@@ -1,71 +1,190 @@
-import React from 'react';
-import { Calendar, Clock } from 'lucide-react';
-import { formatDate } from '../utils/dateUtils';
+import React, { useState } from 'react';
 
-const ContentDisplay = ({ dateLoading, selectedDate, selectedContent }) => {
-  if (dateLoading) {
+const ContentDisplay = ({ content, isLoading }) => {
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'long',
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
+  const renderFilePreview = (file) => {
+    if (!file) return null;
+
+    const isImage = file.contentType && file.contentType.startsWith('image/');
+    
+    if (isImage) {
+      return (
+        <div className="file-preview image-preview">
+          <img
+            src={file.url}
+            alt={file.fileName || 'Timeline image'}
+            className="content-image"
+            onClick={() => setSelectedImage(file)}
+            loading="lazy"
+          />
+          {file.fileName && (
+            <div className="image-caption">
+              {file.fileName}
+            </div>
+          )}
+        </div>
+      );
+    } else {
+      return (
+        <div className="file-preview document-preview">
+          <div className="document-icon">📄</div>
+          <div className="document-info">
+            <div className="document-name">{file.fileName}</div>
+            <div className="document-type">{file.contentType}</div>
+            <a 
+              href={file.url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="document-link"
+            >
+              View Document
+            </a>
+          </div>
+        </div>
+      );
+    }
+  };
+
+  const closeImageModal = () => {
+    setSelectedImage(null);
+  };
+
+  if (isLoading) {
     return (
-      <div className="flex justify-center items-center py-16">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="content-display loading">
+        <div className="loading-container">
+          <div className="spinner large"></div>
+          <p>Loading content...</p>
+        </div>
       </div>
     );
   }
 
-  if (!selectedDate) {
+  if (!content) {
     return (
-      <div className="text-center py-16">
-        <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-gray-600 mb-2">Select a Date</h3>
-        <p className="text-gray-500">Click on a date in the calendar to see what happened that day</p>
-      </div>
-    );
-  }
-
-  if (!selectedContent) {
-    return (
-      <div className="text-center py-16">
-        <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-        <h3 className="text-xl font-semibold text-gray-600 mb-2">Nothing Here Yet</h3>
-        <p className="text-gray-500 mb-4">
-          No content available for {selectedDate.toLocaleDateString('en-US', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })}
-        </p>
-        <p className="text-sm text-gray-400">Check back later - more content coming soon!</p>
+      <div className="content-display empty">
+        <div className="empty-state">
+          <div className="empty-icon">📅</div>
+          <h3>No content selected</h3>
+          <p>Select a date from the calendar to view timeline content.</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-        <Calendar className="w-4 h-4" />
-        <span>{formatDate(selectedContent.date)}</span>
+    <>
+      <div className="content-display">
+        <div className="content-header">
+          <div className="content-date">
+            <div className="date-icon">📅</div>
+            <span>{formatDate(content.date)}</span>
+          </div>
+          
+          {content.category && (
+            <div className={`content-category category-${content.category.toLowerCase()}`}>
+              {content.category}
+            </div>
+          )}
+        </div>
+
+        <div className="content-body">
+          {content.title && (
+            <h2 className="content-title">{content.title}</h2>
+          )}
+
+          {content.description && (
+            <div className="content-description">
+              {content.description.split('\n').map((line, index) => (
+                <p key={index}>{line}</p>
+              ))}
+            </div>
+          )}
+
+          {content.files && content.files.length > 0 && (
+            <div className="content-files">
+              <h3 className="files-title">Attachments</h3>
+              <div className="files-grid">
+                {content.files.map((file, index) => (
+                  <div key={index} className="file-item">
+                    {renderFilePreview(file)}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {content.tags && content.tags.length > 0 && (
+            <div className="content-tags">
+              <div className="tags-label">Tags:</div>
+              <div className="tags-list">
+                {content.tags.map((tag, index) => (
+                  <span key={index} className="tag">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {(content.createdAt || content.updatedAt) && (
+          <div className="content-footer">
+            <div className="content-metadata">
+              {content.createdAt && (
+                <div className="metadata-item">
+                  <span className="metadata-label">Created:</span>
+                  <span className="metadata-value">
+                    {new Date(content.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+              )}
+              {content.updatedAt && content.updatedAt !== content.createdAt && (
+                <div className="metadata-item">
+                  <span className="metadata-label">Updated:</span>
+                  <span className="metadata-value">
+                    {new Date(content.updatedAt).toLocaleDateString()}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
-      
-      <h3 className="text-2xl font-bold text-gray-900 mb-4">{selectedContent.title}</h3>
-      
-      {selectedContent.type === 'image' && (
-        <img 
-          src={selectedContent.imageUrl} 
-          alt={selectedContent.title}
-          className="w-full rounded-lg mb-4"
-        />
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <div className="image-modal" onClick={closeImageModal}>
+          <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="image-modal-close" onClick={closeImageModal}>
+              ×
+            </button>
+            <img
+              src={selectedImage.url}
+              alt={selectedImage.fileName || 'Full size image'}
+              className="modal-image"
+            />
+            {selectedImage.fileName && (
+              <div className="modal-image-caption">
+                {selectedImage.fileName}
+              </div>
+            )}
+          </div>
+        </div>
       )}
-      
-      <p className="text-gray-700 leading-relaxed mb-4">{selectedContent.content}</p>
-      
-      <div className="flex flex-wrap gap-2">
-        {selectedContent.tags.map(tag => (
-          <span key={tag} className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
-            {tag}
-          </span>
-        ))}
-      </div>
-    </div>
+    </>
   );
 };
 
