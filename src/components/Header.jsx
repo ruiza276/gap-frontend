@@ -2,61 +2,78 @@ import React from 'react';
 
 const Header = () => {
   return (
-    <header>
-      <div className="text-center mb-8">
+    <header className="enhanced-header">
+      <div className="header-background">
+        <div className="floating-shapes">
+          <div className="shape shape-1"></div>
+          <div className="shape shape-2"></div>
+          <div className="shape shape-3"></div>
+          <div className="shape shape-4"></div>
+        </div>
+      </div>
+      
+      <div className="header-container">
         <div className="header-content">
-          <h1>
-            <span className="logo-text">GapinMyResume</span>
-            <span style={{ color: 'var(--primary-blue)' }}>.dev</span>
-          </h1>
-          <p>
-            What does one do with so much time?
-          </p>
-          
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '1rem',
-            marginTop: '1rem'
-          }}>
-            <a 
-              href="https://github.com/ruiza276" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="social-link"
-            >
-              🔗 GitHub
-            </a>
-            <a 
-              href="https://www.linkedin.com/in/alex-r-6205b113b/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="social-link"
-            >
-              💼 LinkedIn
-            </a>
+          <div className="brand-section">
+            <h1 className="main-title">
+              <span className="title-main">Gap</span>
+              <span className="title-highlight">In</span>
+              <span className="title-main">My</span>
+              <span className="title-highlight">Resume</span>
+              <span className="title-domain">.dev</span>
+            </h1>
+            <p className="tagline">
+              Turning downtime into <span className="highlight-text">uptime</span> – 
+              documenting the journey between opportunities
+            </p>
           </div>
-          
-          <div style={{
-            marginTop: '2rem',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.75rem 1.5rem',
-            background: 'rgba(16, 185, 129, 0.1)',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
-            borderRadius: '20px',
-            color: 'var(--success-green)',
-            fontSize: '0.875rem',
-            fontWeight: '500'
-          }}>
-            <div style={{
-              width: '8px',
-              height: '8px',
-              background: 'var(--success-green)',
-              borderRadius: '50%',
-              animation: 'pulse 2s infinite'
-            }}></div>
+
+          <div className="status-section">
+            <div className="availability-badge">
+              <div className="pulse-dot"></div>
+              <span>Available for opportunities</span>
+            </div>
+          </div>
+
+          <div className="social-section">
+            <div className="social-links">
+              <a 
+                href="https://github.com/ruiza276" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="social-btn github"
+              >
+                <span className="social-icon">⚡</span>
+                <span className="social-text">GitHub</span>
+                <div className="btn-glow"></div>
+              </a>
+              
+              <a 
+                href="https://www.linkedin.com/in/alex-r-6205b113b/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="social-btn linkedin"
+              >
+                <span className="social-icon">🚀</span>
+                <span className="social-text">LinkedIn</span>
+                <div className="btn-glow"></div>
+              </a>
+              
+              <a 
+                href="https://alexruiz.dev" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="social-btn portfolio"
+              >
+                <span className="social-icon">🌟</span>
+                <span className="social-text">Portfolio</span>
+                <div className="btn-glow"></div>
+              </a>
+            </div>
+          </div>
+
+          <div className="subtitle">
+            <p>What does one do with so much time? <em>Everything.</em></p>
           </div>
         </div>
       </div>
