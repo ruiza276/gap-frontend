@@ -13,17 +13,17 @@ const Footer = () => {
   const socialLinks = [
     { 
       name: 'LinkedIn', 
-      url: 'https://linkedin.com/in/yourprofile', 
+      url: 'https://www.linkedin.com/in/alex-r-6205b113b/', 
       icon: '💼' 
     },
     { 
       name: 'GitHub', 
-      url: 'https://github.com/yourusername', 
+      url: 'https://github.com/ruiza276', 
       icon: '🐙' 
     },
     { 
       name: 'Email', 
-      url: 'mailto:your.email@example.com', 
+      url: 'ruizaa276@gmail.com', 
       icon: '✉️' 
     }
   ];
@@ -41,7 +41,6 @@ const Footer = () => {
             <div className="footer-status">
               <div className="status-indicator">
                 <div className="status-dot online"></div>
-                <span>Available for opportunities</span>
               </div>
             </div>
           </div>
@@ -59,7 +58,7 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Quick Links Section */}
+{/*           Quick Links Section
           <div className="footer-section">
             <h4 className="footer-section-title">Quick Links</h4>
             <div className="footer-links">
@@ -68,7 +67,7 @@ const Footer = () => {
               <a href="#contact" className="footer-link">Contact</a>
               <a href="#projects" className="footer-link">Projects</a>
             </div>
-          </div>
+          </div> */}
 
           {/* Social Section */}
           <div className="footer-section">
@@ -100,7 +99,7 @@ const Footer = () => {
             <div className="footer-meta">
               <span className="version">v2.0</span>
               <span className="divider">•</span>
-              <span className="last-updated">Updated Jan 2025</span>
+              <span className="last-updated">Updated Aug 2025</span>
             </div>
           </div>
         </div>
