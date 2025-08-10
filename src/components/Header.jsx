@@ -2,78 +2,103 @@ import React from 'react';
 
 const Header = () => {
   return (
-    <header className="enhanced-header">
-      <div className="header-background">
-        <div className="floating-shapes">
-          <div className="shape shape-1"></div>
-          <div className="shape shape-2"></div>
-          <div className="shape shape-3"></div>
-          <div className="shape shape-4"></div>
-        </div>
+    <header className="tech-header">
+      <div className="tech-header-background">
+        <div className="grid-overlay"></div>
+        <div className="accent-line accent-line-1"></div>
+        <div className="accent-line accent-line-2"></div>
+        <div className="accent-line accent-line-3"></div>
       </div>
       
-      <div className="header-container">
-        <div className="header-content">
-          <div className="brand-section">
-            <h1 className="main-title">
-              <span className="title-main">Gap</span>
-              <span className="title-highlight">In</span>
-              <span className="title-main">My</span>
-              <span className="title-highlight">Resume</span>
-              <span className="title-domain">.dev</span>
-            </h1>
-            <p className="tagline">
-              Turning downtime into <span className="highlight-text">uptime</span> – 
-              documenting the journey between opportunities
+      <div className="tech-header-container">
+        <div className="tech-header-content">
+          <div className="tech-brand-section">
+            <div className="tech-logo-container">
+              <h1 className="tech-main-title">
+                <span className="tech-title-main">Gap</span>
+                <span className="tech-title-accent">In</span>
+                <span className="tech-title-main">My</span>
+                <span className="tech-title-accent">Resume</span>
+                <span className="tech-title-domain">.dev</span>
+              </h1>
+              <div className="tech-logo-line"></div>
+            </div>
+            
+            <p className="tech-tagline">
+              What does one do with time? • 
+              <br></br>
+              <span className="tech-highlight"> Growth is never linear</span>
             </p>
           </div>
 
-          <div className="status-section">
-            <div className="availability-badge">
-              <div className="pulse-dot"></div>
-              <span>Available for opportunities</span>
+          <div className="tech-status-section">
+            <div className="tech-status-card">
+              <div className="status-indicator-pro">
+                <div className="status-ring"></div>
+                <div className="status-dot-pro active"></div>
+              </div>
+              <div className="status-text">
+                <span className="status-label">Status:</span>
+                <span className="status-value">Grow</span>
+              </div>
             </div>
           </div>
 
-          <div className="social-section">
-            <div className="social-links">
+          <div className="tech-nav-section">
+            <div className="tech-navigation">
               <a 
                 href="https://github.com/ruiza276" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="social-btn github"
+                className="tech-nav-link"
               >
-                <span className="social-icon">⚡</span>
-                <span className="social-text">GitHub</span>
-                <div className="btn-glow"></div>
+                <div className="nav-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                  </svg>
+                </div>
+                <span>GitHub</span>
+                <div className="nav-underline"></div>
               </a>
               
               <a 
                 href="https://www.linkedin.com/in/alex-r-6205b113b/" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="social-btn linkedin"
+                className="tech-nav-link"
               >
-                <span className="social-icon">🚀</span>
-                <span className="social-text">LinkedIn</span>
-                <div className="btn-glow"></div>
+                <div className="nav-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  </svg>
+                </div>
+                <span>LinkedIn</span>
+                <div className="nav-underline"></div>
               </a>
               
               <a 
                 href="https://alexruiz.dev" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="social-btn portfolio"
+                className="tech-nav-link primary"
               >
-                <span className="social-icon">🌟</span>
-                <span className="social-text">Portfolio</span>
-                <div className="btn-glow"></div>
+                <div className="nav-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 9.74s9-4.19 9-9.74V7l-10-5z"/>
+                  </svg>
+                </div>
+                <span>Portfolio</span>
+                <div className="nav-underline"></div>
               </a>
             </div>
           </div>
 
-          <div className="subtitle">
-            <p>What does one do with so much time? <em>Everything.</em></p>
+          <div className="tech-subtitle">
+            <p>
+              Juat a human experiencing life. <br />
+              <span className="tech-highlight">Every gap tells a story of change.</span> 
+
+            </p>
           </div>
         </div>
       </div>
