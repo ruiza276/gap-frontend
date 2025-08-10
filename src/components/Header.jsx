@@ -57,7 +57,6 @@ const Header = () => {
               borderRadius: '50%',
               animation: 'pulse 2s infinite'
             }}></div>
-            Available for opportunities
           </div>
         </div>
       </div>
