@@ -1,90 +1,204 @@
-import React from 'react';
-import { User, Mail, Send } from 'lucide-react';
+import React, { useState } from 'react';
 
-const ContactForm = ({ contactForm, setContactForm, submitting, submitSuccess, setSubmitSuccess, handleContactSubmit }) => {
-  if (submitSuccess) {
-    return (
-      <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-        <div className="text-green-600 text-xl mb-2">✓</div>
-        <h3 className="text-lg font-semibold text-green-800 mb-2">Message Sent!</h3>
-        <p className="text-green-700">Thanks for reaching out. I'll get back to you soon.</p>
-        <button 
-          onClick={() => setSubmitSuccess(false)}
-          className="mt-4 text-blue-600 hover:text-blue-800 transition-colors"
-        >
-          Send Another Message
-        </button>
-      </div>
-    );
-  }
+const ContactForm = ({ apiBaseUrl }) => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null); // 'success', 'error', or null
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    if (!formData.subject.trim()) {
+      newErrors.subject = 'Subject is required';
+    }
+
+    if (!formData.message.trim()) {
+      newErrors.message = 'Message is required';
+    } else if (formData.message.trim().length < 10) {
+      newErrors.message = 'Message must be at least 10 characters long';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+          createdAt: new Date().toISOString()
+        })
+      });
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        setFormData({
+          name: '',
+          email: '',
+          subject: '',
+          message: ''
+        });
+      } else {
+        throw new Error('Failed to send message');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Name
-        </label>
-        <div className="relative">
-          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+    <div className="contact-form-container">
+      <div className="contact-form" onSubmit={handleSubmit}>
+        {submitStatus === 'success' && (
+          <div className="alert alert-success">
+            <div className="alert-icon">✓</div>
+            <div>
+              <strong>Message sent successfully!</strong>
+              <p>Thank you for reaching out. I'll get back to you soon.</p>
+            </div>
+          </div>
+        )}
+
+        {submitStatus === 'error' && (
+          <div className="alert alert-error">
+            <div className="alert-icon">⚠</div>
+            <div>
+              <strong>Failed to send message</strong>
+              <p>Please try again or contact me directly.</p>
+            </div>
+          </div>
+        )}
+
+        <div className="form-row">
+          <div className="form-group">
+            <label htmlFor="name" className="form-label">Name *</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              className={`form-input ${errors.name ? 'error' : ''}`}
+              placeholder="Your full name"
+              disabled={isSubmitting}
+            />
+            {errors.name && <span className="form-error">{errors.name}</span>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="email" className="form-label">Email *</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              className={`form-input ${errors.email ? 'error' : ''}`}
+              placeholder="your.email@example.com"
+              disabled={isSubmitting}
+            />
+            {errors.email && <span className="form-error">{errors.email}</span>}
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="subject" className="form-label">Subject *</label>
           <input
             type="text"
-            required
-            value={contactForm.name}
-            onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-            placeholder="Your name"
+            id="subject"
+            name="subject"
+            value={formData.subject}
+            onChange={handleInputChange}
+            className={`form-input ${errors.subject ? 'error' : ''}`}
+            placeholder="What's this about?"
+            disabled={isSubmitting}
           />
+          {errors.subject && <span className="form-error">{errors.subject}</span>}
         </div>
-      </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Email
-        </label>
-        <div className="relative">
-          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-          <input
-            type="email"
-            required
-            value={contactForm.email}
-            onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-            placeholder="your.email@example.com"
+        <div className="form-group">
+          <label htmlFor="message" className="form-label">Message *</label>
+          <textarea
+            id="message"
+            name="message"
+            value={formData.message}
+            onChange={handleInputChange}
+            className={`form-textarea ${errors.message ? 'error' : ''}`}
+            rows="6"
+            placeholder="Tell me about your project, question, or just say hello!"
+            disabled={isSubmitting}
           />
+          {errors.message && <span className="form-error">{errors.message}</span>}
         </div>
-      </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Message
-        </label>
-        <textarea
-          required
-          rows={4}
-          value={contactForm.message}
-          onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
-          placeholder="Your message..."
-        />
+        <button 
+          type="button"
+          onClick={handleSubmit}
+          className={`btn btn-primary ${isSubmitting ? 'loading' : ''}`}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <span className="spinner"></span>
+              Sending...
+            </>
+          ) : (
+            'Send Message'
+          )}
+        </button>
       </div>
-
-      <button
-        onClick={handleContactSubmit}
-        disabled={submitting}
-        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
-      >
-        {submitting ? (
-          <>
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-            Sending...
-          </>
-        ) : (
-          <>
-            <Send className="w-5 h-5" />
-            Send Message
-          </>
-        )}
-      </button>
     </div>
   );
 };

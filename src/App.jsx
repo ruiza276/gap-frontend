@@ -58,45 +58,68 @@ const GapPortfolio = () => {
     setCurrentDate(newDate);
   };
 
-  // Error display component
+  // Enhanced Error display component with new styling
   const ErrorDisplay = ({ error, onRetry, type = "content" }) => (
-    <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-      <div className="text-red-600 text-xl mb-2">⚠️</div>
-      <h3 className="text-lg font-semibold text-red-800 mb-2">Error Loading {type}</h3>
-      <p className="text-red-700 mb-4">{error}</p>
-      <button 
-        onClick={onRetry}
-        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-      >
-        Try Again
-      </button>
+    <div className="card-enhanced">
+      <div className="error-message">
+        <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>⚠️</div>
+        <h3 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem', color: '#dc2626' }}>
+          Error Loading {type}
+        </h3>
+        <p style={{ color: '#7f1d1d', marginBottom: '1.5rem' }}>{error}</p>
+        <button 
+          onClick={onRetry}
+          className="btn-primary"
+        >
+          Try Again
+        </button>
+      </div>
     </div>
   );
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-        <Header />
+      <div className="app-container">
+        {/* Header with enhanced styling */}
+        <div className="header-gradient">
+          <Header />
+        </div>
 
-        <main className="max-w-6xl mx-auto px-4 py-8">
+        {/* Main content area with enhanced styling */}
+        <main className="main-content">
           {/* Calendar and Timeline Section */}
-          <section className="mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">My Journey Calendar</h2>
+          <section style={{ marginBottom: '4rem' }}>
+            <div className="text-center mb-8">
+              <h2 className="section-title">
+                <span className="text-gradient">My Journey Calendar</span>
+              </h2>
+              <p style={{ 
+                fontSize: '1.125rem', 
+                color: 'var(--gray-600)', 
+                maxWidth: '600px', 
+                margin: '0 auto',
+                marginBottom: '2rem'
+              }}>
+                Track my daily progress, learning milestones, and project developments during this career transition period
+              </p>
+            </div>
             
             {contentError ? (
               <ErrorDisplay error={contentError} onRetry={retryContent} type="calendar data" />
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <CalendarView 
-                  currentDate={currentDate}
-                  navigateMonth={navigateMonth}
-                  handleDateClick={handleDateClick}
-                  selectedDate={selectedDate}
-                  hasContentForDate={hasContentForDate}
-                  loading={contentLoading}
-                />
+              <div className="grid-2">
+                <div className="card-enhanced calendar-container">
+                  <CalendarView 
+                    currentDate={currentDate}
+                    navigateMonth={navigateMonth}
+                    handleDateClick={handleDateClick}
+                    selectedDate={selectedDate}
+                    hasContentForDate={hasContentForDate}
+                    loading={contentLoading}
+                  />
+                </div>
                 
-                <div className="bg-gray-50 rounded-lg p-6">
+                <div className="card-enhanced">
                   <ContentDisplay 
                     dateLoading={dateLoading}
                     selectedDate={selectedDate}
@@ -107,22 +130,66 @@ const GapPortfolio = () => {
             )}
           </section>
 
-          {/* Contact Section */}
+          {/* Contact Section with enhanced styling */}
           {contactError ? (
             <ErrorDisplay error={contactError} onRetry={() => setContactError(null)} type="contact form" />
           ) : (
-            <ContactSection 
-              contactForm={contactForm}
-              setContactForm={setContactForm}
-              submitting={submitting}
-              submitSuccess={submitSuccess}
-              setSubmitSuccess={setSubmitSuccess}
-              handleContactSubmit={handleContactSubmit}
-            />
+            <div className="card-enhanced">
+              <ContactSection 
+                contactForm={contactForm}
+                setContactForm={setContactForm}
+                submitting={submitting}
+                submitSuccess={submitSuccess}
+                setSubmitSuccess={setSubmitSuccess}
+                handleContactSubmit={handleContactSubmit}
+              />
+            </div>
           )}
+
+          {/* Stats section */}
+          <div className="grid-3" style={{ marginTop: '4rem' }}>
+            <div className="card-enhanced text-center p-6">
+              <div className="text-gradient" style={{ fontSize: '2.5rem', fontWeight: '700', marginBottom: '0.5rem' }}>
+                ∞
+              </div>
+              <div style={{ color: 'var(--gray-600)', fontWeight: '500', marginBottom: '0.25rem' }}>
+                Learning Continues
+              </div>
+              <p style={{ fontSize: '0.875rem', color: 'var(--gray-500)' }}>
+                Every day brings new knowledge
+              </p>
+            </div>
+            
+            <div className="card-enhanced text-center p-6">
+              <div className="text-gradient" style={{ fontSize: '2.5rem', fontWeight: '700', marginBottom: '0.5rem' }}>
+                {Math.ceil((new Date() - new Date(2024, 0, 1)) / (1000 * 60 * 60 * 24))}
+              </div>
+              <div style={{ color: 'var(--gray-600)', fontWeight: '500', marginBottom: '0.25rem' }}>
+                Days of Growth
+              </div>
+              <p style={{ fontSize: '0.875rem', color: 'var(--gray-500)' }}>
+                Since starting this journey
+              </p>
+            </div>
+            
+            <div className="card-enhanced text-center p-6">
+              <div className="text-gradient" style={{ fontSize: '2.5rem', fontWeight: '700', marginBottom: '0.5rem' }}>
+                100%
+              </div>
+              <div style={{ color: 'var(--gray-600)', fontWeight: '500', marginBottom: '0.25rem' }}>
+                Commitment
+              </div>
+              <p style={{ fontSize: '0.875rem', color: 'var(--gray-500)' }}>
+                To continuous improvement
+              </p>
+            </div>
+          </div>
         </main>
 
-        <Footer />
+        {/* Footer with enhanced styling */}
+        <div className="footer-enhanced">
+          <Footer />
+        </div>
       </div>
     </ErrorBoundary>
   );
