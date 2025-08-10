@@ -140,7 +140,8 @@ const ContentDisplay = ({ content, isLoading }) => {
           )}
         </div>
 
-        {(content.createdAt || content.updatedAt) && (
+{/* Uncomment if you want to display created/updated metadata
+{/*         {(content.createdAt || content.updatedAt) && (
           <div className="content-footer">
             <div className="content-metadata">
               {content.createdAt && (
@@ -161,7 +162,7 @@ const ContentDisplay = ({ content, isLoading }) => {
               )}
             </div>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* Image Modal */}
