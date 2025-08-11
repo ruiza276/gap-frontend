@@ -235,16 +235,6 @@ const ContentDisplay = ({ content, isLoading }) => {
             </div>
           )}
         </div>
-
-        {/* Development debug info */}
-        {process.env.NODE_ENV === 'development' && content && (
-          <div className="content-debug-info">
-            <details>
-              <summary>Debug Info</summary>
-              <pre>{JSON.stringify(content, null, 2)}</pre>
-            </details>
-          </div>
-        )}
       </div>
 
       {/* Optimized Image Modal */}
