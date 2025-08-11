@@ -1729,3 +1729,272 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Additional CSS for Frontend Optimizations */
+/* Add this to your existing index.css file */
+
+/* Image Loading States */
+.image-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--tech-bg-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tech-space-2);
+  color: var(--tech-text-muted);
+  font-size: 0.875rem;
+}
+
+.image-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--tech-space-6);
+  background: var(--tech-bg-secondary);
+  border: 1px solid var(--tech-border);
+  border-radius: var(--tech-radius-md);
+  gap: var(--tech-space-3);
+  color: var(--tech-text-muted);
+  min-height: 200px;
+}
+
+.error-icon {
+  font-size: 2rem;
+  opacity: 0.5;
+}
+
+.btn-retry {
+  background: var(--tech-primary);
+  color: white;
+  border: none;
+  padding: var(--tech-space-2) var(--tech-space-4);
+  border-radius: var(--tech-radius-sm);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all var(--tech-transition);
+}
+
+.btn-retry:hover {
+  background: var(--tech-primary-dark);
+  transform: translateY(-1px);
+}
+
+/* File Size Debug Info */
+.file-size-debug {
+  opacity: 0.6;
+  font-size: 0.75rem;
+  margin-left: var(--tech-space-2);
+  color: var(--tech-text-muted);
+}
+
+/* Content Debug Info */
+.content-debug-info {
+  margin-top: var(--tech-space-6);
+  padding: var(--tech-space-4);
+  background: var(--tech-bg-secondary);
+  border-radius: var(--tech-radius-md);
+  border: 1px solid var(--tech-border);
+}
+
+.content-debug-info summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--tech-text-secondary);
+  padding: var(--tech-space-2);
+  border-radius: var(--tech-radius-sm);
+  transition: all var(--tech-transition);
+}
+
+.content-debug-info summary:hover {
+  background: var(--tech-bg-tertiary);
+}
+
+.content-debug-info pre {
+  margin-top: var(--tech-space-3);
+  background: var(--tech-bg-primary);
+  padding: var(--tech-space-3);
+  border-radius: var(--tech-radius-sm);
+  font-size: 0.75rem;
+  overflow-x: auto;
+  max-height: 300px;
+  color: var(--tech-text-primary);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Loading States for Images */
+.file-preview.image-preview {
+  position: relative;
+  overflow: hidden;
+}
+
+.content-image {
+  transition: all var(--tech-transition);
+}
+
+.content-image[style*="display: none"] + .image-loading-overlay {
+  display: flex;
+}
+
+/* Enhanced Modal Accessibility */
+.image-modal {
+  backdrop-filter: blur(8px);
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(8px);
+  }
+}
+
+.image-modal-close:focus {
+  outline: 2px solid var(--tech-accent-light);
+  outline-offset: 2px;
+}
+
+/* Cache Status Indicators (Development Only) */
+.cache-status {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: var(--tech-bg-dark);
+  color: var(--tech-text-inverse);
+  padding: var(--tech-space-2) var(--tech-space-3);
+  border-radius: var(--tech-radius-md);
+  font-size: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  z-index: 1000;
+  opacity: 0.8;
+  display: none;
+}
+
+.cache-status.show {
+  display: block;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 0.8;
+  }
+}
+
+/* API Usage Monitor (Development Only) */
+.api-usage-monitor {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--tech-bg-dark);
+  color: var(--tech-text-inverse);
+  padding: var(--tech-space-3);
+  border-radius: var(--tech-radius-md);
+  font-size: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  z-index: 1000;
+  opacity: 0.9;
+  display: none;
+  max-width: 200px;
+}
+
+.api-usage-monitor.show {
+  display: block;
+}
+
+.api-usage-monitor .usage-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--tech-space-1);
+}
+
+.api-usage-monitor .usage-label {
+  color: var(--tech-gray-300);
+}
+
+.api-usage-monitor .usage-value {
+  color: var(--tech-accent-light);
+  font-weight: 600;
+}
+
+/* Loading Animation Improvements */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.spinner.large {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Optimized Transitions for Better Performance */
+.file-preview,
+.content-image,
+.btn,
+.form-input,
+.form-textarea {
+  will-change: transform;
+}
+
+/* Reduce Motion for Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .content-image,
+  .file-preview,
+  .image-modal,
+  .spinner {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .image-modal {
+    backdrop-filter: none;
+  }
+}
+
+/* High Performance Mode (for slower devices) */
+@media (max-width: 768px) and (max-resolution: 150dpi) {
+  .image-modal {
+    backdrop-filter: none;
+    background: rgba(15, 23, 42, 0.95);
+  }
+  
+  .content-image {
+    transition: none;
+  }
+  
+  .file-preview:hover {
+    transform: none;
+  }
+}
+
+/* Memory Usage Optimization */
+.content-image[loading="lazy"] {
+  content-visibility: auto;
+  contain-intrinsic-size: 200px;
+}
