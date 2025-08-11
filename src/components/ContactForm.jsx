@@ -221,7 +221,7 @@ const ContactForm = () => {
         </form>
 
         {/* Debug info for development */}
-        {process.env.NODE_ENV === 'development' && (
+{/*         {process.env.NODE_ENV === 'development' && (
           <div style={{ 
             marginTop: '2rem', 
             padding: '1rem', 
@@ -233,7 +233,7 @@ const ContactForm = () => {
             <strong>Dev Info:</strong>
             <br />API Service Stats: {JSON.stringify(apiService.getStats(), null, 2)}
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
