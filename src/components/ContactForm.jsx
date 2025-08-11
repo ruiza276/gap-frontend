@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import { apiService, debounce } from '../services/apiService';
 
-const ContactForm = ({ apiBaseUrl }) => {
+const ContactForm = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -38,8 +39,21 @@ const ContactForm = ({ apiBaseUrl }) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Debounced input change handler to prevent excessive state updates
+  const debouncedInputChange = useCallback(
+    debounce((name, value) => {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }, 200), // 200ms debounce
+    []
+  );
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // Update immediately for UI responsiveness
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -52,6 +66,9 @@ const ContactForm = ({ apiBaseUrl }) => {
         [name]: ''
       }));
     }
+
+    // Also trigger debounced update for any side effects
+    debouncedInputChange(name, value);
   };
 
   const handleSubmit = async (e) => {
@@ -61,38 +78,38 @@ const ContactForm = ({ apiBaseUrl }) => {
       return;
     }
 
+    // Prevent double submissions
+    if (isSubmitting) {
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitStatus(null);
 
     try {
-      const response = await fetch(`${apiBaseUrl}/api/messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          subject: formData.subject,
-          message: formData.message,
-          createdAt: new Date().toISOString()
-        })
+      await apiService.sendMessage(formData);
+      
+      setSubmitStatus('success');
+      setFormData({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
       });
+      
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => {
+        setSubmitStatus(null);
+      }, 5000);
 
-      if (response.ok) {
-        setSubmitStatus('success');
-        setFormData({
-          name: '',
-          email: '',
-          subject: '',
-          message: ''
-        });
-      } else {
-        throw new Error('Failed to send message');
-      }
     } catch (error) {
       console.error('Error submitting form:', error);
       setSubmitStatus('error');
+      
+      // Auto-hide error message after 8 seconds
+      setTimeout(() => {
+        setSubmitStatus(null);
+      }, 8000);
     } finally {
       setIsSubmitting(false);
     }
@@ -100,7 +117,7 @@ const ContactForm = ({ apiBaseUrl }) => {
 
   return (
     <div className="contact-form-container">
-      <div className="contact-form" onSubmit={handleSubmit}>
+      <div className="contact-form">
         {submitStatus === 'success' && (
           <div className="alert alert-success">
             <div className="alert-icon">✓</div>
@@ -116,88 +133,107 @@ const ContactForm = ({ apiBaseUrl }) => {
             <div className="alert-icon">⚠</div>
             <div>
               <strong>Failed to send message</strong>
-              <p>Please try again or contact me directly.</p>
+              <p>Please try again or contact me directly. Check your connection and retry.</p>
             </div>
           </div>
         )}
 
-        <div className="form-row">
+        <form onSubmit={handleSubmit}>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="name" className="form-label">Name *</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                className={`form-input ${errors.name ? 'error' : ''}`}
+                placeholder="Your full name"
+                disabled={isSubmitting}
+                autoComplete="name"
+              />
+              {errors.name && <span className="form-error">{errors.name}</span>}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="email" className="form-label">Email *</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className={`form-input ${errors.email ? 'error' : ''}`}
+                placeholder="your.email@example.com"
+                disabled={isSubmitting}
+                autoComplete="email"
+              />
+              {errors.email && <span className="form-error">{errors.email}</span>}
+            </div>
+          </div>
+
           <div className="form-group">
-            <label htmlFor="name" className="form-label">Name *</label>
+            <label htmlFor="subject" className="form-label">Subject *</label>
             <input
               type="text"
-              id="name"
-              name="name"
-              value={formData.name}
+              id="subject"
+              name="subject"
+              value={formData.subject}
               onChange={handleInputChange}
-              className={`form-input ${errors.name ? 'error' : ''}`}
-              placeholder="Your full name"
+              className={`form-input ${errors.subject ? 'error' : ''}`}
+              placeholder="What's this about?"
               disabled={isSubmitting}
+              autoComplete="off"
             />
-            {errors.name && <span className="form-error">{errors.name}</span>}
+            {errors.subject && <span className="form-error">{errors.subject}</span>}
           </div>
 
           <div className="form-group">
-            <label htmlFor="email" className="form-label">Email *</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
+            <label htmlFor="message" className="form-label">Message *</label>
+            <textarea
+              id="message"
+              name="message"
+              value={formData.message}
               onChange={handleInputChange}
-              className={`form-input ${errors.email ? 'error' : ''}`}
-              placeholder="your.email@example.com"
+              className={`form-textarea ${errors.message ? 'error' : ''}`}
+              rows="6"
+              placeholder="Tell me about your project, question, or just say hello!"
               disabled={isSubmitting}
             />
-            {errors.email && <span className="form-error">{errors.email}</span>}
+            {errors.message && <span className="form-error">{errors.message}</span>}
           </div>
-        </div>
 
-        <div className="form-group">
-          <label htmlFor="subject" className="form-label">Subject *</label>
-          <input
-            type="text"
-            id="subject"
-            name="subject"
-            value={formData.subject}
-            onChange={handleInputChange}
-            className={`form-input ${errors.subject ? 'error' : ''}`}
-            placeholder="What's this about?"
+          <button 
+            type="submit"
+            className={`btn btn-primary ${isSubmitting ? 'loading' : ''}`}
             disabled={isSubmitting}
-          />
-          {errors.subject && <span className="form-error">{errors.subject}</span>}
-        </div>
+          >
+            {isSubmitting ? (
+              <>
+                <span className="spinner"></span>
+                Sending...
+              </>
+            ) : (
+              'Send Message'
+            )}
+          </button>
+        </form>
 
-        <div className="form-group">
-          <label htmlFor="message" className="form-label">Message *</label>
-          <textarea
-            id="message"
-            name="message"
-            value={formData.message}
-            onChange={handleInputChange}
-            className={`form-textarea ${errors.message ? 'error' : ''}`}
-            rows="6"
-            placeholder="Tell me about your project, question, or just say hello!"
-            disabled={isSubmitting}
-          />
-          {errors.message && <span className="form-error">{errors.message}</span>}
-        </div>
-
-        <button 
-          type="button"
-          onClick={handleSubmit}
-          className={`btn btn-primary ${isSubmitting ? 'loading' : ''}`}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <>
-              <span className="spinner"></span>
-              Sending...
-            </>
-          ) : (
-            'Send Message'
-          )}
-        </button>
+        {/* Debug info for development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div style={{ 
+            marginTop: '2rem', 
+            padding: '1rem', 
+            background: '#f5f5f5', 
+            borderRadius: '8px',
+            fontSize: '0.875rem',
+            color: '#666'
+          }}>
+            <strong>Dev Info:</strong>
+            <br />API Service Stats: {JSON.stringify(apiService.getStats(), null, 2)}
+          </div>
+        )}
       </div>
     </div>
   );
