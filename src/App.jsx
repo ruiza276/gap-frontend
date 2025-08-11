@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import CalendarView from './components/CalendarView';
 import ContentDisplay from './components/ContentDisplay';
 import ContactForm from './components/ContactForm';
 import ErrorBoundary from './components/ErrorBoundary';
+import { apiService, debounce } from './services/apiService';
 
 function App() {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -15,78 +16,104 @@ function App() {
 
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5156';
 
+  // Development monitoring and optimization tracking
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      // Log API usage statistics every 30 seconds
+      const logStats = () => {
+        const stats = apiService.getStats();
+        console.log('📊 API Usage Stats:', stats);
+      };
+
+      // Initial log
+      logStats();
+      
+      // Set up interval
+      const interval = setInterval(logStats, 30000);
+      
+      // Cleanup
+      return () => clearInterval(interval);
+    }
+  }, []);
+
   // Fetch timeline items on component mount
   useEffect(() => {
     fetchTimelineItems();
   }, []);
 
+  // Debounced content fetching to prevent rapid API calls
+  const debouncedFetchContent = useCallback(
+    debounce((date) => {
+      fetchContentForDate(date);
+    }, 300), // 300ms delay
+    []
+  );
+
   // Fetch content when selected date changes
   useEffect(() => {
     if (selectedDate) {
-      fetchContentForDate(selectedDate);
+      debouncedFetchContent(selectedDate);
     } else {
       setSelectedContent(null);
     }
-  }, [selectedDate]);
+  }, [selectedDate, debouncedFetchContent]);
 
   const fetchTimelineItems = async () => {
     try {
       setError(null);
-      const response = await fetch(`${apiBaseUrl}/api/timeline`);
-      if (response.ok) {
-        const items = await response.json();
-        // Transform backend data to match frontend expectations
-        const transformedItems = items.map(item => ({
-          ...item,
-          date: item.date.split('T')[0] // Convert "2025-08-10T00:00:00" to "2025-08-10"
-        }));
-        setTimelineItems(transformedItems);
-      } else {
-        console.error('Failed to fetch timeline items');
-        setError('Failed to load timeline data');
-      }
+      // Use optimized API service with caching
+      const items = await apiService.getTimeline();
+      
+      // Transform backend data to match frontend expectations
+      const transformedItems = items.map(item => ({
+        ...item,
+        date: item.date.split('T')[0] // Convert "2025-08-10T00:00:00" to "2025-08-10"
+      }));
+      setTimelineItems(transformedItems);
     } catch (error) {
       console.error('Error fetching timeline items:', error);
       setError('Failed to connect to server');
+      
+      // Fallback to empty array to prevent UI breakage
+      setTimelineItems([]);
     }
   };
 
   const fetchContentForDate = async (date) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${apiBaseUrl}/api/timeline/date/${date}`);
-      if (response.ok) {
-        const content = await response.json();
-        // Transform backend data to match ContentDisplay expectations
-        const transformedContent = {
-          ...content,
-          date: content.date.split('T')[0],
-          // Transform file data if it exists
-          files: content.fileUrl ? [{
-            url: content.fileUrl,
-            fileName: content.fileName,
-            contentType: content.fileType === 'image' ? 'image/jpeg' : 'text/plain'
-          }] : []
-        };
-        setSelectedContent(transformedContent);
-      } else if (response.status === 404) {
+      // Use optimized API service with caching
+      const content = await apiService.getTimelineForDate(date);
+      
+      // Transform backend data to match ContentDisplay expectations
+      const transformedContent = {
+        ...content,
+        date: content.date.split('T')[0],
+        // Transform file data if it exists
+        files: content.fileUrl ? [{
+          url: content.fileUrl,
+          fileName: content.fileName,
+          contentType: content.fileType === 'image' ? 'image/jpeg' : 'text/plain'
+        }] : []
+      };
+      setSelectedContent(transformedContent);
+    } catch (error) {
+      if (error.message.includes('404')) {
+        // No content for this date
         setSelectedContent(null);
       } else {
-        console.error('Failed to fetch content for date');
+        console.error('Error fetching content for date:', error);
         setSelectedContent(null);
       }
-    } catch (error) {
-      console.error('Error fetching content for date:', error);
-      setSelectedContent(null);
     } finally {
       setIsLoading(false);
     }
   };
 
   // This is the function that gets passed to CalendarView
-  const handleDateSelect = (dateString) => {
+  const handleDateSelect = useCallback((dateString) => {
     setSelectedDate(dateString);
-  };
+  }, []);
 
   return (
     <ErrorBoundary>
@@ -129,7 +156,7 @@ function App() {
               </div>
               
               <div className="contact-section-wrapper" style={{ marginTop: '4rem' }}>
-                <ContactForm apiBaseUrl={apiBaseUrl} />
+                <ContactForm />
               </div>
             </>
           )}

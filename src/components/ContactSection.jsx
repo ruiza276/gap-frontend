@@ -2,7 +2,7 @@ import React from 'react';
 import { MessageSquare, Users, Coffee, Briefcase } from 'lucide-react';
 import ContactForm from './ContactForm';
 
-const ContactSection = ({ contactForm, setContactForm, submitting, submitSuccess, setSubmitSuccess, handleContactSubmit }) => {
+const ContactSection = () => {
   return (
     <section className="p-8 lg:p-12">
       <div className="max-w-4xl mx-auto">
@@ -45,14 +45,7 @@ const ContactSection = ({ contactForm, setContactForm, submitting, submitSuccess
         {/* Contact Form */}
         <div className="max-w-2xl mx-auto">
           <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-lg">
-            <ContactForm 
-              contactForm={contactForm}
-              setContactForm={setContactForm}
-              submitting={submitting}
-              submitSuccess={submitSuccess}
-              setSubmitSuccess={setSubmitSuccess}
-              handleContactSubmit={handleContactSubmit}
-            />
+            <ContactForm />
           </div>
         </div>
 
@@ -62,10 +55,10 @@ const ContactSection = ({ contactForm, setContactForm, submitting, submitSuccess
             Prefer email? You can also reach me directly at
           </p>
           <a 
-            href="mailto:your.email@example.com" 
+            href="mailto:ruizaa276@gmail.com" 
             className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
           >
-            <span>your.email@example.com</span>
+            <span>ruizaa276@gmail.com</span>
           </a>
           <p className="text-sm text-gray-400 mt-4">
             I typically respond within 24-48 hours
