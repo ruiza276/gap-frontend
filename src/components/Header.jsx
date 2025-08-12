@@ -25,7 +25,9 @@ const Header = () => {
             </div>
             
             <p className="tech-tagline">
-              What does one do with time? • 
+              What does one do with time? 
+              <br></br>
+              •
               <br></br>
               <span className="tech-highlight"> Growth is never linear</span>
             </p>
@@ -39,7 +41,7 @@ const Header = () => {
               </div>
               <div className="status-text">
                 <span className="status-label">Status:</span>
-                <span className="status-value">Grow</span>
+                <span className="status-value">Growing</span>
               </div>
             </div>
           </div>
@@ -95,7 +97,7 @@ const Header = () => {
 
           <div className="tech-subtitle">
             <p>
-              Juat a human experiencing life. <br />
+              Juat a human experiencing life <br />
               <span className="tech-highlight">Every gap tells a story of change.</span> 
 
             </p>
