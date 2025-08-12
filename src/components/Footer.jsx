@@ -39,28 +39,28 @@ const Footer = () => {
       name: 'Main Portfolio', 
       url: 'https://alexruiz.dev', 
       icon: '🎯',
-      description: 'Complete project showcase',
+      description: 'Original portfolio site',
       type: 'primary'
     },
     { 
       name: 'LinkedIn Profile', 
       url: 'https://www.linkedin.com/in/alex-r-6205b113b/', 
       icon: '💼',
-      description: 'Professional network',
+      description: 'Professional social media profile',
       type: 'secondary'
     },
     { 
       name: 'GitHub Repositories', 
       url: 'https://github.com/ruiza276', 
       icon: '💻',
-      description: 'Open source contributions',
+      description: 'Where my code lives',
       type: 'secondary'
     },
     { 
       name: 'Direct Contact', 
       url: 'mailto:ruizaa276@gmail.com', 
       icon: '📧',
-      description: 'Email communication',
+      description: 'Send me an email!',
       type: 'secondary'
     }
   ];
@@ -89,8 +89,11 @@ const Footer = () => {
             </div>
             
             <p className="footer-mission">
-              Transforming career transitions into transparent professional narratives. 
-              Every day documented, every skill enhanced, every connection meaningful.
+              Ocean Vuong once wrote,
+              <br />
+              <span className="footer-highlight">"loneliness is still time spent. with the world"</span>
+              <br />
+              And being being unemployed is still time spent with the world
             </p>
             
             <div className="footer-status-indicator">
