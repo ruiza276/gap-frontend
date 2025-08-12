@@ -1,6 +1,3 @@
-// =====================================
-// src/App.jsx - Fixed useCallback warnings
-// =====================================
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -8,7 +5,7 @@ import CalendarView from './components/CalendarView';
 import ContentDisplay from './components/ContentDisplay';
 import ContactForm from './components/ContactForm';
 import ErrorBoundary from './components/ErrorBoundary';
-import { apiService, debounce } from './services/apiService';
+import { apiService } from './services/apiService';
 
 function App() {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -16,8 +13,6 @@ function App() {
   const [selectedContent, setSelectedContent] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-
-
 
   // Development monitoring and optimization tracking
   useEffect(() => {
@@ -42,10 +37,30 @@ function App() {
   // Fetch timeline items on component mount
   useEffect(() => {
     fetchTimelineItems();
-  }, []); // Empty dependency array is intentional
+  }, []);
 
-  // Define fetchContentForDate first
-  const fetchContentForDate = useCallback(async (date) => {
+  const fetchTimelineItems = async () => {
+    try {
+      setError(null);
+      // Use optimized API service with caching
+      const items = await apiService.getTimeline();
+      
+      // Transform backend data to match frontend expectations
+      const transformedItems = items.map(item => ({
+        ...item,
+        date: item.date.split('T')[0] // Convert "2025-08-10T00:00:00" to "2025-08-10"
+      }));
+      setTimelineItems(transformedItems);
+    } catch (error) {
+      console.error('Error fetching timeline items:', error);
+      setError('Failed to connect to server');
+      
+      // Fallback to empty array to prevent UI breakage
+      setTimelineItems([]);
+    }
+  };
+
+  const fetchContentForDate = async (date) => {
     setIsLoading(true);
     try {
       // Use optimized API service with caching
@@ -74,50 +89,25 @@ function App() {
     } finally {
       setIsLoading(false);
     }
-  }, []); // No dependencies needed for this function
+  };
 
-  // Debounced content fetching
-  const debouncedFetchContent = useCallback(
-    debounce((date) => {
-      fetchContentForDate(date);
-    }, 300),
-    [fetchContentForDate] // Now fetchContentForDate is a known dependency
-  );
-
-  // Fetch content when selected date changes
+  // Simple debouncing without useCallback - this avoids the hook dependency issue
   useEffect(() => {
     if (selectedDate) {
-      debouncedFetchContent(selectedDate);
+      const timeoutId = setTimeout(() => {
+        fetchContentForDate(selectedDate);
+      }, 300);
+
+      return () => clearTimeout(timeoutId);
     } else {
       setSelectedContent(null);
     }
-  }, [selectedDate, debouncedFetchContent]);
-
-  const fetchTimelineItems = async () => {
-    try {
-      setError(null);
-      // Use optimized API service with caching
-      const items = await apiService.getTimeline();
-      
-      // Transform backend data to match frontend expectations
-      const transformedItems = items.map(item => ({
-        ...item,
-        date: item.date.split('T')[0] // Convert "2025-08-10T00:00:00" to "2025-08-10"
-      }));
-      setTimelineItems(transformedItems);
-    } catch (error) {
-      console.error('Error fetching timeline items:', error);
-      setError('Failed to connect to server');
-      
-      // Fallback to empty array to prevent UI breakage
-      setTimelineItems([]);
-    }
-  };
+  }, [selectedDate]);
 
   // This is the function that gets passed to CalendarView
   const handleDateSelect = useCallback((dateString) => {
     setSelectedDate(dateString);
-  }, []); // No dependencies needed
+  }, []);
 
   return (
     <ErrorBoundary>
