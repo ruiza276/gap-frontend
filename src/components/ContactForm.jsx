@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { apiService, debounce } from '../services/apiService';
+import React, { useState } from 'react';
+import { apiService } from '../services/apiService';
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -39,15 +39,6 @@ const ContactForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Debounced input change handler to prevent excessive state updates
-  const debouncedInputChange = useCallback(
-    debounce((name, value) => {
-      // This was causing issues - removing as it's redundant
-      // The main state update happens immediately in handleInputChange
-    }, 200),
-    []
-  );
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
@@ -64,9 +55,6 @@ const ContactForm = () => {
         [name]: ''
       }));
     }
-
-    // Trigger debounced update (this was causing the warning, now it's simplified)
-    debouncedInputChange(name, value);
   };
 
   const handleSubmit = async (e) => {
