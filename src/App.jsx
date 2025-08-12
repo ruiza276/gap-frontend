@@ -1,3 +1,6 @@
+// =====================================
+// src/App.jsx - Fixed useCallback warnings
+// =====================================
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -14,7 +17,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5156';
+
 
   // Development monitoring and optimization tracking
   useEffect(() => {
@@ -39,14 +42,46 @@ function App() {
   // Fetch timeline items on component mount
   useEffect(() => {
     fetchTimelineItems();
-  }, []);
+  }, []); // Empty dependency array is intentional
 
-  // Debounced content fetching to prevent rapid API calls
+  // Define fetchContentForDate first
+  const fetchContentForDate = useCallback(async (date) => {
+    setIsLoading(true);
+    try {
+      // Use optimized API service with caching
+      const content = await apiService.getTimelineForDate(date);
+      
+      // Transform backend data to match ContentDisplay expectations
+      const transformedContent = {
+        ...content,
+        date: content.date.split('T')[0],
+        // Transform file data if it exists
+        files: content.fileUrl ? [{
+          url: content.fileUrl,
+          fileName: content.fileName,
+          contentType: content.fileType === 'image' ? 'image/jpeg' : 'text/plain'
+        }] : []
+      };
+      setSelectedContent(transformedContent);
+    } catch (error) {
+      if (error.message.includes('404')) {
+        // No content for this date
+        setSelectedContent(null);
+      } else {
+        console.error('Error fetching content for date:', error);
+        setSelectedContent(null);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, []); // No dependencies needed for this function
+
+  // Debounced content fetching
   const debouncedFetchContent = useCallback(
     debounce((date) => {
       fetchContentForDate(date);
-    }, 300), // 300ms delay
-    []
+    }, 300),
+    [fetchContentForDate] // Now fetchContentForDate is a known dependency
   );
 
   // Fetch content when selected date changes
@@ -79,41 +114,10 @@ function App() {
     }
   };
 
-  const fetchContentForDate = async (date) => {
-    setIsLoading(true);
-    try {
-      // Use optimized API service with caching
-      const content = await apiService.getTimelineForDate(date);
-      
-      // Transform backend data to match ContentDisplay expectations
-      const transformedContent = {
-        ...content,
-        date: content.date.split('T')[0],
-        // Transform file data if it exists
-        files: content.fileUrl ? [{
-          url: content.fileUrl,
-          fileName: content.fileName,
-          contentType: content.fileType === 'image' ? 'image/jpeg' : 'text/plain'
-        }] : []
-      };
-      setSelectedContent(transformedContent);
-    } catch (error) {
-      if (error.message.includes('404')) {
-        // No content for this date
-        setSelectedContent(null);
-      } else {
-        console.error('Error fetching content for date:', error);
-        setSelectedContent(null);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   // This is the function that gets passed to CalendarView
   const handleDateSelect = useCallback((dateString) => {
     setSelectedDate(dateString);
-  }, []);
+  }, []); // No dependencies needed
 
   return (
     <ErrorBoundary>
