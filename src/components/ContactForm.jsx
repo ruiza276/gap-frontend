@@ -42,11 +42,9 @@ const ContactForm = () => {
   // Debounced input change handler to prevent excessive state updates
   const debouncedInputChange = useCallback(
     debounce((name, value) => {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }, 200), // 200ms debounce
+      // This was causing issues - removing as it's redundant
+      // The main state update happens immediately in handleInputChange
+    }, 200),
     []
   );
 
@@ -67,7 +65,7 @@ const ContactForm = () => {
       }));
     }
 
-    // Also trigger debounced update for any side effects
+    // Trigger debounced update (this was causing the warning, now it's simplified)
     debouncedInputChange(name, value);
   };
 
@@ -219,21 +217,6 @@ const ContactForm = () => {
             )}
           </button>
         </form>
-
-        {/* Debug info for development */}
-{/*         {process.env.NODE_ENV === 'development' && (
-          <div style={{ 
-            marginTop: '2rem', 
-            padding: '1rem', 
-            background: '#f5f5f5', 
-            borderRadius: '8px',
-            fontSize: '0.875rem',
-            color: '#666'
-          }}>
-            <strong>Dev Info:</strong>
-            <br />API Service Stats: {JSON.stringify(apiService.getStats(), null, 2)}
-          </div>
-        )} */}
       </div>
     </div>
   );

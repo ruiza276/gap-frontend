@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 const CalendarView = ({ onDateSelect, selectedDate, timelineItems = [] }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
