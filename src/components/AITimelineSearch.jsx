@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { apiService } from '../services/apiService';
 
-const AITimelineSearch = ({ onResultsFound }) => {
+const AITimelineSearch = ({ onResultsFound, onDateSelect }) => {
     const [query, setQuery] = useState('');
     const [results, setResults] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -21,13 +21,14 @@ const AITimelineSearch = ({ onResultsFound }) => {
 
         try {
             const searchResults = await apiService.searchTimelineWithAI(searchQuery);
+            console.log('🔍 AI Search Results:', searchResults);
             setResults(searchResults);
 
-            // Optional: notify parent component of results
             if (onResultsFound) {
                 onResultsFound(searchResults);
             }
         } catch (err) {
+            console.error('❌ AI Search Error:', err);
             setError(err.message);
         } finally {
             setLoading(false);
@@ -39,14 +40,52 @@ const AITimelineSearch = ({ onResultsFound }) => {
         handleSearch(suggestion);
     };
 
+    // Handle clicking on a search result - pass full entry data
+    const handleResultClick = (entry) => {
+        console.log('🎯 Search result clicked:', entry);
+        
+        if (!entry || !entry.date) {
+            console.error('❌ Invalid entry data:', entry);
+            return;
+        }
+
+        // Pass the full entry to the parent component
+        if (onDateSelect) {
+            console.log('📤 Passing entry to parent:', entry);
+            onDateSelect(entry); // Pass the entire entry, not just the date
+        }
+        
+        // Add visual feedback
+        const resultElement = document.querySelector(`[data-entry-id="${entry.id}"]`);
+        if (resultElement) {
+            resultElement.classList.add('search-result-selected');
+            setTimeout(() => {
+                resultElement.classList.remove('search-result-selected');
+            }, 600);
+        }
+        
+        // Scroll to content area on mobile
+        if (window.innerWidth <= 768) {
+            setTimeout(() => {
+                const contentSection = document.querySelector('.content-section');
+                if (contentSection) {
+                    contentSection.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                }
+            }, 100);
+        }
+    };
+
     return (
         <div className="ai-search-container" style={{
             background: 'linear-gradient(135deg, var(--tech-bg-card) 0%, var(--tech-bg-glass) 100%)',
-            borderRadius: 'var(--tech-radius-xl)', // Larger radius
-            padding: 'var(--tech-space-8)', // More padding
+            borderRadius: 'var(--tech-radius-xl)',
+            padding: 'var(--tech-space-8)',
             marginBottom: 'var(--tech-space-6)',
-            border: '2px solid var(--tech-border-accent)', // More prominent border
-            boxShadow: 'var(--tech-shadow-xl)', // Bigger shadow
+            border: '2px solid var(--tech-border-accent)',
+            boxShadow: 'var(--tech-shadow-xl)',
             position: 'relative',
             overflow: 'hidden'
         }}>
@@ -61,13 +100,13 @@ const AITimelineSearch = ({ onResultsFound }) => {
             }}></div>
 
             <div style={{ marginBottom: 'var(--tech-space-4)', position: 'relative', zIndex: 2 }}>
-                <h2 style={{ // Changed from h3 to h2 for more prominence
+                <h2 style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: 'var(--tech-space-3)',
                     color: 'var(--tech-text-primary)',
-                    fontSize: '1.5rem', // Larger
-                    fontWeight: '700', // Bolder
+                    fontSize: '1.5rem',
+                    fontWeight: '700',
                     margin: '0 0 var(--tech-space-2) 0',
                     textAlign: 'center',
                     justifyContent: 'center'
@@ -76,7 +115,7 @@ const AITimelineSearch = ({ onResultsFound }) => {
                 </h2>
                 <p style={{
                     color: 'var(--tech-text-secondary)',
-                    fontSize: '1rem', // Slightly larger
+                    fontSize: '1rem',
                     margin: 0,
                     textAlign: 'center',
                     fontWeight: '500'
@@ -84,6 +123,7 @@ const AITimelineSearch = ({ onResultsFound }) => {
                     Search my timeline using natural language - powered by OpenAI
                 </p>
             </div>
+
             {/* Search Input */}
             <div style={{ marginBottom: 'var(--tech-space-4)' }}>
                 <div style={{
@@ -103,9 +143,9 @@ const AITimelineSearch = ({ onResultsFound }) => {
                             padding: 'var(--tech-space-3)',
                             border: '2px solid var(--tech-border)',
                             borderRadius: 'var(--tech-radius-md)',
-                            fontSize: window.innerWidth <= 768 ? '16px' : '1rem', // Prevents zoom on iOS
+                            fontSize: window.innerWidth <= 768 ? '16px' : '1rem',
                             background: 'var(--tech-bg-primary)',
-                            minHeight: '44px', // Touch target
+                            minHeight: '44px',
                             boxSizing: 'border-box'
                         }}
                     />
@@ -171,6 +211,7 @@ const AITimelineSearch = ({ onResultsFound }) => {
                     ))}
                 </div>
             </div>
+
             {/* Error Display */}
             {error && (
                 <div className="alert alert-error">
@@ -178,6 +219,12 @@ const AITimelineSearch = ({ onResultsFound }) => {
                     <div>
                         <strong>Search Error</strong>
                         <p>{error}</p>
+                        {process.env.NODE_ENV === 'development' && (
+                            <details style={{ marginTop: '10px', fontSize: '0.75rem' }}>
+                                <summary>Debug Info</summary>
+                                <div>Check console for detailed error information</div>
+                            </details>
+                        )}
                     </div>
                 </div>
             )}
@@ -204,7 +251,7 @@ const AITimelineSearch = ({ onResultsFound }) => {
                             {results.summary}
                         </p>
 
-                        {results.skills.length > 0 && (
+                        {results.skills && results.skills.length > 0 && (
                             <div style={{ marginTop: 'var(--tech-space-3)' }}>
                                 <strong style={{
                                     fontSize: '0.875rem',
@@ -228,7 +275,7 @@ const AITimelineSearch = ({ onResultsFound }) => {
                         )}
                     </div>
 
-                    {results.entries.length > 0 && (
+                    {results.entries && results.entries.length > 0 && (
                         <div>
                             <h4 style={{
                                 color: 'var(--tech-text-primary)',
@@ -237,6 +284,15 @@ const AITimelineSearch = ({ onResultsFound }) => {
                                 marginBottom: 'var(--tech-space-3)'
                             }}>
                                 📅 Timeline Matches ({results.entries.length})
+                                <span style={{
+                                    fontSize: '0.875rem',
+                                    color: 'var(--tech-text-muted)',
+                                    fontWeight: '400',
+                                    marginLeft: 'var(--tech-space-2)',
+                                    display: window.innerWidth <= 480 ? 'block' : 'inline'
+                                }}>
+                                    Click to view in content area →
+                                </span>
                             </h4>
                             <div style={{
                                 display: 'flex',
@@ -246,23 +302,53 @@ const AITimelineSearch = ({ onResultsFound }) => {
                                 {results.entries.map(entry => (
                                     <div
                                         key={entry.id}
+                                        data-entry-id={entry.id}
+                                        onClick={() => handleResultClick(entry)}
+                                        className="ai-search-result-card"
                                         style={{
                                             padding: 'var(--tech-space-4)',
                                             background: 'var(--tech-bg-primary)',
-                                            border: '1px solid var(--tech-border)',
+                                            border: '2px solid var(--tech-border)',
                                             borderRadius: 'var(--tech-radius-md)',
                                             cursor: 'pointer',
-                                            transition: 'all var(--tech-transition)'
+                                            transition: 'all var(--tech-transition)',
+                                            position: 'relative'
                                         }}
                                         onMouseEnter={(e) => {
-                                            e.target.style.borderColor = 'var(--tech-primary)';
-                                            e.target.style.transform = 'translateY(-2px)';
+                                            if (window.innerWidth > 768) {
+                                                e.currentTarget.style.borderColor = 'var(--tech-primary)';
+                                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                                e.currentTarget.style.boxShadow = 'var(--tech-shadow-lg)';
+                                            }
                                         }}
                                         onMouseLeave={(e) => {
-                                            e.target.style.borderColor = 'var(--tech-border)';
-                                            e.target.style.transform = 'translateY(0)';
+                                            if (window.innerWidth > 768) {
+                                                e.currentTarget.style.borderColor = 'var(--tech-border)';
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = 'none';
+                                            }
                                         }}
                                     >
+                                        {/* Click indicator */}
+                                        <div className="search-result-click-indicator" style={{
+                                            position: 'absolute',
+                                            top: 'var(--tech-space-3)',
+                                            right: 'var(--tech-space-3)',
+                                            width: '24px',
+                                            height: '24px',
+                                            borderRadius: '50%',
+                                            background: 'var(--tech-primary)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: 'white',
+                                            fontSize: '0.75rem',
+                                            opacity: '0.7',
+                                            transition: 'all var(--tech-transition)'
+                                        }}>
+                                            →
+                                        </div>
+
                                         <div style={{
                                             fontSize: '0.875rem',
                                             color: 'var(--tech-text-muted)',
@@ -280,7 +366,8 @@ const AITimelineSearch = ({ onResultsFound }) => {
                                             fontSize: '1rem',
                                             fontWeight: '600',
                                             marginBottom: 'var(--tech-space-2)',
-                                            margin: '0 0 var(--tech-space-2) 0'
+                                            margin: '0 0 var(--tech-space-2) 0',
+                                            paddingRight: 'var(--tech-space-8)'
                                         }}>
                                             {entry.title}
                                         </h5>
@@ -288,11 +375,27 @@ const AITimelineSearch = ({ onResultsFound }) => {
                                             color: 'var(--tech-text-secondary)',
                                             fontSize: '0.875rem',
                                             lineHeight: '1.5',
-                                            margin: 0
+                                            margin: 0,
+                                            paddingRight: 'var(--tech-space-8)'
                                         }}>
-                                            {entry.description.substring(0, 150)}
-                                            {entry.description.length > 150 ? '...' : ''}
+                                            {entry.description && entry.description.substring(0, 150)}
+                                            {entry.description && entry.description.length > 150 ? '...' : ''}
                                         </p>
+                                        
+                                        {/* Enhanced hint */}
+                                        <div className="search-result-hint" style={{
+                                            marginTop: 'var(--tech-space-2)',
+                                            fontSize: '0.75rem',
+                                            color: 'var(--tech-primary)',
+                                            fontWeight: '600',
+                                            opacity: '0.8',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 'var(--tech-space-1)'
+                                        }}>
+                                            <span>👆</span>
+                                            Click to view in content area
+                                        </div>
                                     </div>
                                 ))}
                             </div>
