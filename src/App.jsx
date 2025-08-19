@@ -8,7 +8,6 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { apiService } from './services/apiService';
 import AITimelineSearch from './components/AITimelineSearch';
 
-
 function App() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [timelineItems, setTimelineItems] = useState([]);
@@ -19,19 +18,12 @@ function App() {
   // Development monitoring and optimization tracking
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
-      // Log API usage statistics every 30 seconds
       const logStats = () => {
         const stats = apiService.getStats();
         console.log('📊 API Usage Stats:', stats);
       };
-
-      // Initial log
       logStats();
-
-      // Set up interval
       const interval = setInterval(logStats, 30000);
-
-      // Cleanup
       return () => clearInterval(interval);
     }
   }, []);
@@ -44,20 +36,15 @@ function App() {
   const fetchTimelineItems = async () => {
     try {
       setError(null);
-      // Use optimized API service with caching
       const items = await apiService.getTimeline();
-
-      // Transform backend data to match frontend expectations
       const transformedItems = items.map(item => ({
         ...item,
-        date: item.date.split('T')[0] // Convert "2025-08-10T00:00:00" to "2025-08-10"
+        date: item.date.split('T')[0]
       }));
       setTimelineItems(transformedItems);
     } catch (error) {
       console.error('Error fetching timeline items:', error);
       setError('Failed to connect to server');
-
-      // Fallback to empty array to prevent UI breakage
       setTimelineItems([]);
     }
   };
@@ -65,14 +52,10 @@ function App() {
   const fetchContentForDate = async (date) => {
     setIsLoading(true);
     try {
-      // Use optimized API service with caching
       const content = await apiService.getTimelineForDate(date);
-
-      // Transform backend data to match ContentDisplay expectations
       const transformedContent = {
         ...content,
         date: content.date.split('T')[0],
-        // Transform file data if it exists
         files: content.fileUrl ? [{
           url: content.fileUrl,
           fileName: content.fileName,
@@ -82,7 +65,6 @@ function App() {
       setSelectedContent(transformedContent);
     } catch (error) {
       if (error.message.includes('404')) {
-        // No content for this date
         setSelectedContent(null);
       } else {
         console.error('Error fetching content for date:', error);
@@ -93,20 +75,17 @@ function App() {
     }
   };
 
-  // Simple debouncing without useCallback - this avoids the hook dependency issue
   useEffect(() => {
     if (selectedDate) {
       const timeoutId = setTimeout(() => {
         fetchContentForDate(selectedDate);
       }, 300);
-
       return () => clearTimeout(timeoutId);
     } else {
       setSelectedContent(null);
     }
   }, [selectedDate]);
 
-  // This is the function that gets passed to CalendarView
   const handleDateSelect = useCallback((dateString) => {
     setSelectedDate(dateString);
   }, []);
@@ -114,25 +93,8 @@ function App() {
   return (
     <ErrorBoundary>
       <div className="app-container">
-        <div className="app-content">
-          <div className="calendar-section">
-            <AITimelineSearch />
-            <CalendarView
-              onDateSelect={handleDateSelect}
-              selectedDate={selectedDate}
-              timelineItems={timelineItems}
-            />
-          </div>
-
-          <div className="content-section">
-            <ContentDisplay
-              content={selectedContent}
-              isLoading={isLoading}
-            />
-          </div>
-        </div>
         <Header />
-
+        
         <main className="app-main">
           {error ? (
             <div className="alert alert-error" style={{ maxWidth: '800px', margin: '0 auto 2rem' }}>
@@ -151,6 +113,16 @@ function App() {
             </div>
           ) : (
             <>
+              {/* AI Search Section - Full Width Above Everything */}
+              <div className="ai-search-section" style={{ 
+                marginBottom: 'var(--tech-space-8)',
+                maxWidth: '1200px',
+                margin: '0 auto var(--tech-space-8) auto'
+              }}>
+                <AITimelineSearch />
+              </div>
+
+              {/* Main Content Grid - Calendar + Content */}
               <div className="app-content">
                 <div className="calendar-section">
                   <CalendarView
@@ -168,6 +140,7 @@ function App() {
                 </div>
               </div>
 
+              {/* Contact Form */}
               <div className="contact-section-wrapper" style={{ marginTop: '4rem' }}>
                 <ContactForm />
               </div>

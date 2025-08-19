@@ -1998,3 +1998,17 @@ body {
   content-visibility: auto;
   contain-intrinsic-size: 200px;
 }
+/* Add to your index.css */
+.ai-search-section {
+  padding: 0 var(--tech-space-4);
+}
+
+@media (max-width: 768px) {
+  .ai-search-section {
+    margin-bottom: var(--tech-space-6) !important;
+  }
+  
+  .app-content {
+    margin-top: 0;
+  }
+}

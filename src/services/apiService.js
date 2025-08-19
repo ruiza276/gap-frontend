@@ -4,6 +4,12 @@ class ApiService {
   constructor() {
     this.baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5156';
     this.requestCount = 0;
+
+    // Add this check to your apiService.js
+    if(!process.env.REACT_APP_OPENAI_API_KEY) {
+      console.error('OpenAI API key not found. Please check environment variables.');
+      throw new Error('API key configuration error');
+    }
   }
 
   // Optimized fetch with caching and debouncing
