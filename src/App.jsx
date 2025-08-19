@@ -6,6 +6,8 @@ import ContentDisplay from './components/ContentDisplay';
 import ContactForm from './components/ContactForm';
 import ErrorBoundary from './components/ErrorBoundary';
 import { apiService } from './services/apiService';
+import AITimelineSearch from './components/AITimelineSearch';
+
 
 function App() {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -25,10 +27,10 @@ function App() {
 
       // Initial log
       logStats();
-      
+
       // Set up interval
       const interval = setInterval(logStats, 30000);
-      
+
       // Cleanup
       return () => clearInterval(interval);
     }
@@ -44,7 +46,7 @@ function App() {
       setError(null);
       // Use optimized API service with caching
       const items = await apiService.getTimeline();
-      
+
       // Transform backend data to match frontend expectations
       const transformedItems = items.map(item => ({
         ...item,
@@ -54,7 +56,7 @@ function App() {
     } catch (error) {
       console.error('Error fetching timeline items:', error);
       setError('Failed to connect to server');
-      
+
       // Fallback to empty array to prevent UI breakage
       setTimelineItems([]);
     }
@@ -65,7 +67,7 @@ function App() {
     try {
       // Use optimized API service with caching
       const content = await apiService.getTimelineForDate(date);
-      
+
       // Transform backend data to match ContentDisplay expectations
       const transformedContent = {
         ...content,
@@ -112,8 +114,25 @@ function App() {
   return (
     <ErrorBoundary>
       <div className="app-container">
+        <div className="app-content">
+          <div className="calendar-section">
+            <AITimelineSearch />
+            <CalendarView
+              onDateSelect={handleDateSelect}
+              selectedDate={selectedDate}
+              timelineItems={timelineItems}
+            />
+          </div>
+
+          <div className="content-section">
+            <ContentDisplay
+              content={selectedContent}
+              isLoading={isLoading}
+            />
+          </div>
+        </div>
         <Header />
-        
+
         <main className="app-main">
           {error ? (
             <div className="alert alert-error" style={{ maxWidth: '800px', margin: '0 auto 2rem' }}>
@@ -121,7 +140,7 @@ function App() {
               <div>
                 <strong>Connection Error</strong>
                 <p>{error}</p>
-                <button 
+                <button
                   onClick={fetchTimelineItems}
                   className="btn btn-primary"
                   style={{ marginTop: '1rem' }}
@@ -140,7 +159,7 @@ function App() {
                     timelineItems={timelineItems}
                   />
                 </div>
-                
+
                 <div className="content-section">
                   <ContentDisplay
                     content={selectedContent}
@@ -148,14 +167,14 @@ function App() {
                   />
                 </div>
               </div>
-              
+
               <div className="contact-section-wrapper" style={{ marginTop: '4rem' }}>
                 <ContactForm />
               </div>
             </>
           )}
         </main>
-        
+
         <Footer />
       </div>
     </ErrorBoundary>
