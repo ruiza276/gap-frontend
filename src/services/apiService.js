@@ -10,7 +10,7 @@ class ApiService {
   async fetch(endpoint, options = {}) {
     const url = `${this.baseUrl}${endpoint}`;
     const cacheKey = apiCache.generateKey(url, options);
-    
+
     // Check cache first (for GET requests)
     if (options.method !== 'POST' && options.method !== 'PUT' && options.method !== 'DELETE') {
       const cached = apiCache.get(cacheKey);
@@ -95,10 +95,10 @@ class ApiService {
   async uploadFile(file, onProgress) {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      
+
       // Track upload progress
       if (onProgress) {
         xhr.upload.addEventListener('progress', (e) => {
@@ -143,6 +143,69 @@ class ApiService {
       requestCount: this.requestCount,
       cache: apiCache.getStats()
     };
+  }
+  // Add this method to your ApiService class in src/services/apiService.js
+
+  async searchTimelineWithAI(query) {
+    try {
+      // Get all timeline items first
+      const timelineItems = await this.getTimeline();
+
+      // Call OpenAI to analyze the query against timeline data
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "system",
+              content: `You are searching through a developer's career gap timeline. Analyze the user's query and find relevant timeline entries.
+
+Timeline Data:
+${JSON.stringify(timelineItems, null, 2)}
+
+Return a JSON response with:
+{
+  "summary": "Brief explanation of what you found",
+  "relevantEntries": [array of timeline entry IDs that match],
+  "keySkills": [array of skills/technologies mentioned],
+  "confidence": 0.85
+}`
+            },
+            {
+              role: "user",
+              content: query
+            }
+          ],
+          max_tokens: 500,
+          temperature: 0.3
+        })
+      });
+
+      const data = await response.json();
+      const aiResponse = JSON.parse(data.choices[0].message.content);
+
+      // Filter actual timeline entries that match
+      const matchingEntries = timelineItems.filter(item =>
+        aiResponse.relevantEntries.includes(item.id)
+      );
+
+      return {
+        query: query,
+        summary: aiResponse.summary,
+        entries: matchingEntries,
+        skills: aiResponse.keySkills,
+        confidence: aiResponse.confidence
+      };
+
+    } catch (error) {
+      console.error('AI Search Error:', error);
+      throw new Error('Search temporarily unavailable');
+    }
   }
 }
 
