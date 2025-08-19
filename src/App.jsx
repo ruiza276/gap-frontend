@@ -28,29 +28,22 @@ function App() {
     }
   }, []);
 
-  // Fetch timeline items on component mount
-  useEffect(() => {
-    fetchTimelineItems();
+  // Helper function to transform timeline item to content format
+  const transformTimelineItemToContent = useCallback((timelineItem) => {
+    return {
+      id: timelineItem.id,
+      date: timelineItem.date,
+      title: timelineItem.title || 'Timeline Entry',
+      description: timelineItem.description || timelineItem.content || 'No description available',
+      category: timelineItem.category || 'timeline',
+      files: timelineItem.files || [],
+      tags: timelineItem.tags || [],
+      source: 'timeline-item'
+    };
   }, []);
 
-  const fetchTimelineItems = async () => {
-    try {
-      setError(null);
-      const items = await apiService.getTimeline();
-      const transformedItems = items.map(item => ({
-        ...item,
-        date: item.date.split('T')[0]
-      }));
-      setTimelineItems(transformedItems);
-      console.log('📅 Timeline items loaded:', transformedItems);
-    } catch (error) {
-      console.error('Error fetching timeline items:', error);
-      setError('Failed to connect to server');
-      setTimelineItems([]);
-    }
-  };
-
-  const fetchContentForDate = async (date) => {
+  // Fetch content for a specific date - wrapped in useCallback for stable reference
+  const fetchContentForDate = useCallback(async (date) => {
     console.log('🔍 Fetching content for date:', date);
     setIsLoading(true);
     
@@ -96,21 +89,29 @@ function App() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [timelineItems, transformTimelineItemToContent]);
 
-  // Helper function to transform timeline item to content format
-  const transformTimelineItemToContent = (timelineItem) => {
-    return {
-      id: timelineItem.id,
-      date: timelineItem.date,
-      title: timelineItem.title || 'Timeline Entry',
-      description: timelineItem.description || timelineItem.content || 'No description available',
-      category: timelineItem.category || 'timeline',
-      files: timelineItem.files || [],
-      tags: timelineItem.tags || [],
-      source: 'timeline-item'
-    };
-  };
+  // Fetch timeline items on component mount
+  const fetchTimelineItems = useCallback(async () => {
+    try {
+      setError(null);
+      const items = await apiService.getTimeline();
+      const transformedItems = items.map(item => ({
+        ...item,
+        date: item.date.split('T')[0]
+      }));
+      setTimelineItems(transformedItems);
+      console.log('📅 Timeline items loaded:', transformedItems);
+    } catch (error) {
+      console.error('Error fetching timeline items:', error);
+      setError('Failed to connect to server');
+      setTimelineItems([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTimelineItems();
+  }, [fetchTimelineItems]);
 
   useEffect(() => {
     if (selectedDate) {
@@ -123,7 +124,7 @@ function App() {
       console.log('📅 No date selected, clearing content');
       setSelectedContent(null);
     }
-  }, [selectedDate, timelineItems]);
+  }, [selectedDate, fetchContentForDate]);
 
   const handleDateSelect = useCallback((dateString) => {
     console.log('🎯 Date selected via calendar:', dateString);
@@ -227,6 +228,27 @@ function App() {
             </div>
           ) : (
             <>
+              {/* Debug info in development */}
+              {process.env.NODE_ENV === 'development' && (
+                <div style={{
+                  position: 'fixed',
+                  top: '10px',
+                  left: '10px',
+                  background: 'rgba(0,0,0,0.8)',
+                  color: 'white',
+                  padding: '10px',
+                  borderRadius: '5px',
+                  fontSize: '12px',
+                  zIndex: 9999,
+                  maxWidth: '300px'
+                }}>
+                  <div>Selected Date: {selectedDate || 'None'}</div>
+                  <div>Timeline Items: {timelineItems.length}</div>
+                  <div>Content Loading: {isLoading ? 'Yes' : 'No'}</div>
+                  <div>Has Content: {selectedContent ? 'Yes' : 'No'}</div>
+                  <div>Content Source: {selectedContent?.source || 'None'}</div>
+                </div>
+              )}
 
               {/* AI Search Section */}
               <div className="ai-search-section" style={{ 
@@ -280,6 +302,29 @@ function App() {
                         </>
                       )}
                     </div>
+                  )}
+                  
+                  {/* Debug content info in development */}
+                  {process.env.NODE_ENV === 'development' && selectedContent && (
+                    <details style={{
+                      marginTop: 'var(--tech-space-4)',
+                      padding: 'var(--tech-space-3)',
+                      background: 'var(--tech-bg-secondary)',
+                      borderRadius: 'var(--tech-radius-md)',
+                      fontSize: '0.75rem'
+                    }}>
+                      <summary>Debug: Content Data</summary>
+                      <pre style={{ 
+                        marginTop: '10px',
+                        background: 'white',
+                        padding: '10px',
+                        borderRadius: '5px',
+                        overflow: 'auto',
+                        maxHeight: '200px'
+                      }}>
+                        {JSON.stringify(selectedContent, null, 2)}
+                      </pre>
+                    </details>
                   )}
                 </div>
               </div>
