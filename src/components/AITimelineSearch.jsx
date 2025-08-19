@@ -9,8 +9,8 @@ const AITimelineSearch = ({ onResultsFound, onDateSelect }) => {
 
     const suggestions = [
         "Bikes?",
-        "Chicago",
-        "Time Duncan?",
+        "Chicago?",
+        "Tim Duncan?",
     ];
 
     const handleSearch = async (searchQuery) => {
