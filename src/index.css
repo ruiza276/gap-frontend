@@ -2012,3 +2012,252 @@ body {
     margin-top: 0;
   }
 }
+/* Mobile Layout Fixes - Add to your index.css */
+
+/* iPhone 14 and similar device optimizations */
+@media (max-width: 430px) {
+  /* Header fixes for narrow screens */
+  .tech-header {
+    padding: var(--tech-space-8) var(--tech-space-3) var(--tech-space-6);
+    min-height: 35vh;
+  }
+  
+  .tech-main-title {
+    font-size: clamp(2rem, 8vw, 3.5rem);
+    line-height: 1.2;
+  }
+  
+  .tech-tagline {
+    font-size: clamp(0.9rem, 3vw, 1.1rem);
+    padding: 0 var(--tech-space-2);
+  }
+  
+  .tech-navigation {
+    gap: var(--tech-space-2);
+  }
+  
+  .tech-nav-link {
+    padding: var(--tech-space-2) var(--tech-space-4);
+    font-size: 0.75rem;
+    min-width: auto;
+    width: auto;
+  }
+}
+
+/* AI Search Section Mobile Fixes */
+@media (max-width: 768px) {
+  .ai-search-container {
+    margin-bottom: var(--tech-space-4);
+    padding: var(--tech-space-4);
+  }
+  
+  .ai-search-section {
+    margin-bottom: var(--tech-space-4) !important;
+    padding: 0 var(--tech-space-2);
+  }
+  
+  /* Search input and button layout */
+  .ai-search-container input {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: var(--tech-space-3) var(--tech-space-2);
+  }
+  
+  .ai-search-container button {
+    padding: var(--tech-space-3) var(--tech-space-4);
+    font-size: 0.875rem;
+    min-width: 80px;
+  }
+  
+  /* Stack search elements vertically on very small screens */
+  @media (max-width: 480px) {
+    .ai-search-container > div:first-child > div {
+      flex-direction: column;
+      gap: var(--tech-space-2);
+    }
+    
+    .ai-search-container input {
+      width: 100%;
+    }
+    
+    .ai-search-container button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
+  /* Suggestion buttons responsive */
+  .ai-search-container button[style*="padding: var(--tech-space-1)"] {
+    padding: var(--tech-space-2) var(--tech-space-3) !important;
+    font-size: 0.75rem;
+  }
+}
+
+/* App main content mobile spacing */
+@media (max-width: 768px) {
+  .app-main {
+    padding: var(--tech-space-2);
+  }
+  
+  .app-content {
+    gap: var(--tech-space-4);
+    margin-top: 0;
+  }
+}
+
+/* Calendar mobile optimizations */
+@media (max-width: 430px) {
+  .calendar-container {
+    padding: var(--tech-space-4);
+    max-width: 100%;
+  }
+  
+  .calendar-month-year {
+    font-size: 1rem;
+    margin: 0 var(--tech-space-2);
+  }
+  
+  .calendar-nav-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+  
+  .calendar-day {
+    height: 32px;
+    font-size: 0.75rem;
+    min-height: 32px;
+  }
+  
+  .calendar-weekday {
+    padding: var(--tech-space-1);
+    font-size: 0.65rem;
+  }
+}
+
+/* Content display mobile fixes */
+@media (max-width: 430px) {
+  .content-display {
+    margin: 0;
+    border-radius: var(--tech-radius-md);
+  }
+  
+  .content-header {
+    padding: var(--tech-space-4);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--tech-space-2);
+  }
+  
+  .content-body {
+    padding: var(--tech-space-4);
+  }
+  
+  .content-title {
+    font-size: 1.5rem;
+  }
+  
+  .files-grid {
+    grid-template-columns: 1fr;
+    gap: var(--tech-space-3);
+  }
+}
+
+/* Contact form mobile fixes */
+@media (max-width: 430px) {
+  .contact-form {
+    padding: var(--tech-space-4);
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: var(--tech-space-3);
+    margin-bottom: var(--tech-space-4);
+  }
+  
+  .form-group {
+    margin-bottom: var(--tech-space-4);
+  }
+}
+
+/* Footer mobile optimizations */
+@media (max-width: 430px) {
+  .tech-footer-container {
+    padding: var(--tech-space-8) var(--tech-space-3) var(--tech-space-3);
+  }
+  
+  .footer-logo-text {
+    font-size: 1.5rem;
+  }
+  
+  .tech-stack-grid,
+  .portfolio-links-grid {
+    gap: var(--tech-space-2);
+  }
+  
+  .tech-stack-item,
+  .portfolio-link-item {
+    padding: var(--tech-space-3);
+  }
+}
+
+/* Safe area insets for notched devices like iPhone 14 */
+@supports (padding: max(0px)) {
+  .tech-header {
+    padding-left: max(var(--tech-space-3), env(safe-area-inset-left));
+    padding-right: max(var(--tech-space-3), env(safe-area-inset-right));
+  }
+  
+  .app-main {
+    padding-left: max(var(--tech-space-2), env(safe-area-inset-left));
+    padding-right: max(var(--tech-space-2), env(safe-area-inset-right));
+  }
+  
+  .tech-footer-container {
+    padding-left: max(var(--tech-space-3), env(safe-area-inset-left));
+    padding-right: max(var(--tech-space-3), env(safe-area-inset-right));
+    padding-bottom: max(var(--tech-space-3), env(safe-area-inset-bottom));
+  }
+}
+
+/* Viewport height fixes for mobile browsers */
+@media (max-width: 768px) {
+  .tech-header {
+    min-height: 40vh;
+    /* Use dynamic viewport height if supported */
+    min-height: 40dvh;
+  }
+}
+
+/* Touch target optimization */
+@media (max-width: 768px) {
+  .calendar-day,
+  .tech-nav-link,
+  .btn,
+  button {
+    min-height: 44px; /* Apple's recommended touch target size */
+  }
+  
+  .calendar-nav-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Prevent horizontal scroll on mobile */
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+  
+  .app-container {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  .ai-search-container,
+  .content-display,
+  .calendar-container {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
