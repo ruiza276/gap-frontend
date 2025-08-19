@@ -8,11 +8,9 @@ const AITimelineSearch = ({ onResultsFound }) => {
     const [error, setError] = useState(null);
 
     const suggestions = [
-        "What React projects did he work on?",
-        "Show me his learning activities from 2024",
-        "What full-stack development work did he do?",
-        "When did he work with APIs?",
-        "What skills did he develop during his gap?"
+        "Bikes?",
+        "Chicago",
+        "Time Duncan?",
     ];
 
     const handleSearch = async (searchQuery) => {
