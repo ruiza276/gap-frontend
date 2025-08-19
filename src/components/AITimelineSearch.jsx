@@ -108,12 +108,16 @@ const AITimelineSearch = ({ onResultsFound }) => {
 
             {/* Search Input */}
             <div style={{ marginBottom: 'var(--tech-space-4)' }}>
-                <div style={{ display: 'flex', gap: 'var(--tech-space-3)' }}>
+                <div style={{
+                    display: 'flex',
+                    gap: 'var(--tech-space-2)',
+                    flexDirection: window.innerWidth <= 480 ? 'column' : 'row'
+                }}>
                     <input
                         type="text"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        placeholder="e.g., 'What React projects did he work on?'"
+                        placeholder="What did Alex do in August 2024?"
                         onKeyPress={(e) => e.key === 'Enter' && handleSearch(query)}
                         disabled={loading}
                         style={{
@@ -121,23 +125,29 @@ const AITimelineSearch = ({ onResultsFound }) => {
                             padding: 'var(--tech-space-3)',
                             border: '2px solid var(--tech-border)',
                             borderRadius: 'var(--tech-radius-md)',
-                            fontSize: '1rem',
-                            background: 'var(--tech-bg-primary)'
+                            fontSize: window.innerWidth <= 768 ? '16px' : '1rem', // Prevents zoom on iOS
+                            background: 'var(--tech-bg-primary)',
+                            minHeight: '44px', // Touch target
+                            boxSizing: 'border-box'
                         }}
                     />
                     <button
                         onClick={() => handleSearch(query)}
                         disabled={loading || !query.trim()}
                         className="btn btn-primary"
-                        style={{ minWidth: '100px' }}
+                        style={{
+                            minWidth: window.innerWidth <= 480 ? '100%' : '100px',
+                            minHeight: '44px',
+                            fontSize: window.innerWidth <= 768 ? '0.875rem' : '1rem'
+                        }}
                     >
                         {loading ? (
                             <>
                                 <span className="spinner"></span>
-                                Searching...
+                                {window.innerWidth <= 480 ? 'Searching...' : 'Search'}
                             </>
                         ) : (
-                            'Search'
+                            window.innerWidth <= 480 ? 'Search Timeline' : 'Search'
                         )}
                     </button>
                 </div>
@@ -148,14 +158,16 @@ const AITimelineSearch = ({ onResultsFound }) => {
                 <p style={{
                     fontSize: '0.875rem',
                     color: 'var(--tech-text-muted)',
-                    marginBottom: 'var(--tech-space-2)'
+                    marginBottom: 'var(--tech-space-2)',
+                    textAlign: window.innerWidth <= 480 ? 'center' : 'left'
                 }}>
                     Try asking:
                 </p>
                 <div style={{
                     display: 'flex',
                     flexWrap: 'wrap',
-                    gap: 'var(--tech-space-2)'
+                    gap: 'var(--tech-space-2)',
+                    justifyContent: window.innerWidth <= 480 ? 'center' : 'flex-start'
                 }}>
                     {suggestions.map((suggestion, index) => (
                         <button
@@ -163,14 +175,17 @@ const AITimelineSearch = ({ onResultsFound }) => {
                             onClick={() => handleSuggestionClick(suggestion)}
                             disabled={loading}
                             style={{
-                                padding: 'var(--tech-space-1) var(--tech-space-3)',
+                                padding: window.innerWidth <= 480
+                                    ? 'var(--tech-space-2) var(--tech-space-4)'
+                                    : 'var(--tech-space-1) var(--tech-space-3)',
                                 background: 'var(--tech-bg-tertiary)',
                                 border: '1px solid var(--tech-border)',
                                 borderRadius: 'var(--tech-radius-lg)',
-                                fontSize: '0.75rem',
+                                fontSize: window.innerWidth <= 480 ? '0.875rem' : '0.75rem',
                                 cursor: 'pointer',
                                 transition: 'all var(--tech-transition)',
-                                color: 'var(--tech-text-secondary)'
+                                color: 'var(--tech-text-secondary)',
+                                minHeight: '36px'
                             }}
                         >
                             {suggestion}
@@ -178,7 +193,6 @@ const AITimelineSearch = ({ onResultsFound }) => {
                     ))}
                 </div>
             </div>
-
             {/* Error Display */}
             {error && (
                 <div className="alert alert-error">
