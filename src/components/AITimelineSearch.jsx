@@ -84,28 +84,6 @@ const AITimelineSearch = ({ onResultsFound }) => {
                     Search my timeline using natural language - powered by OpenAI
                 </p>
             </div>
-            {/* Header */}
-            <div style={{ marginBottom: 'var(--tech-space-4)' }}>
-                <h3 style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 'var(--tech-space-2)',
-                    color: 'var(--tech-text-primary)',
-                    fontSize: '1.25rem',
-                    fontWeight: '600',
-                    margin: '0 0 var(--tech-space-2) 0'
-                }}>
-                    🤖 Ask AI About My Journey
-                </h3>
-                <p style={{
-                    color: 'var(--tech-text-secondary)',
-                    fontSize: '0.875rem',
-                    margin: 0
-                }}>
-                    Search my timeline using natural language
-                </p>
-            </div>
-
             {/* Search Input */}
             <div style={{ marginBottom: 'var(--tech-space-4)' }}>
                 <div style={{
