@@ -109,7 +109,7 @@ const ContactForm = () => {
             <div className="alert-icon">✓</div>
             <div>
               <strong>Message sent successfully!</strong>
-              <p>Thank you for reaching out. I'll get back to you soon.</p>
+              <p>Thank you for reaching out! I'll get back to you soon!!</p>
             </div>
           </div>
         )}
@@ -135,7 +135,7 @@ const ContactForm = () => {
                 value={formData.name}
                 onChange={handleInputChange}
                 className={`form-input ${errors.name ? 'error' : ''}`}
-                placeholder="Your full name"
+                placeholder="Who is you? :3"
                 disabled={isSubmitting}
                 autoComplete="name"
               />
@@ -168,7 +168,7 @@ const ContactForm = () => {
               value={formData.subject}
               onChange={handleInputChange}
               className={`form-input ${errors.subject ? 'error' : ''}`}
-              placeholder="What's this about?"
+              placeholder="What's this about? :3"
               disabled={isSubmitting}
               autoComplete="off"
             />
@@ -184,7 +184,7 @@ const ContactForm = () => {
               onChange={handleInputChange}
               className={`form-textarea ${errors.message ? 'error' : ''}`}
               rows="6"
-              placeholder="Tell me about your project, question, or just say hello!"
+              placeholder="Send me a message! :3"
               disabled={isSubmitting}
             />
             {errors.message && <span className="form-error">{errors.message}</span>}
