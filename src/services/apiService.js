@@ -5,11 +5,7 @@ class ApiService {
     this.baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5156';
     this.requestCount = 0;
 
-    // Add this check to your apiService.js
-    if(!process.env.REACT_APP_OPENAI_API_KEY) {
-      console.error('OpenAI API key not found. Please check environment variables.');
-      throw new Error('API key configuration error');
-    }
+    // Removed the OpenAI API key check since we're using Netlify Functions now
   }
 
   // Optimized fetch with caching and debouncing
@@ -150,26 +146,35 @@ class ApiService {
       cache: apiCache.getStats()
     };
   }
-  // Add this method to your ApiService class in src/services/apiService.js
 
+  // AI search method that uses OpenAI locally and Netlify functions in production
   async searchTimelineWithAI(query) {
+    let timelineItems = []; // Declare outside try block so it's accessible in catch
+    
     try {
       // Get all timeline items first
-      const timelineItems = await this.getTimeline();
+      timelineItems = await this.getTimeline();
 
-      // Call OpenAI to analyze the query against timeline data
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            {
-              role: "system",
-              content: `You are searching through a developer's career gap timeline. Analyze the user's query and find relevant timeline entries.
+      // Check if we're in local development
+      const isLocalDev = process.env.NODE_ENV === 'development';
+      const hasLocalApiKey = process.env.REACT_APP_OPENAI_API_KEY;
+      
+      if (isLocalDev && hasLocalApiKey) {
+        console.log('🚧 Local development mode: Making direct OpenAI call');
+        
+        // Direct OpenAI call for local development
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              {
+                role: "system",
+                content: `You are searching through a developer's career gap timeline. Analyze the user's query and find relevant timeline entries.
 
 Timeline Data:
 ${JSON.stringify(timelineItems, null, 2)}
@@ -181,36 +186,77 @@ Return a JSON response with:
   "keySkills": [array of skills/technologies mentioned],
   "confidence": 0.85
 }`
-            },
-            {
-              role: "user",
-              content: query
-            }
-          ],
-          max_tokens: 500,
-          temperature: 0.3
+              },
+              {
+                role: "user",
+                content: query
+              }
+            ],
+            max_tokens: 500,
+            temperature: 0.3
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`OpenAI API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const aiResponse = JSON.parse(data.choices[0].message.content);
+
+        // Filter actual timeline entries that match
+        const matchingEntries = timelineItems.filter(item =>
+          aiResponse.relevantEntries.includes(item.id)
+        );
+
+        return {
+          query: query,
+          summary: aiResponse.summary,
+          entries: matchingEntries,
+          skills: aiResponse.keySkills,
+          confidence: aiResponse.confidence
+        };
+      }
+
+      // Production: Call Netlify function
+      console.log('🚀 Production mode: Using Netlify function');
+      const response = await fetch('/.netlify/functions/ai-search', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: query,
+          timelineItems: timelineItems
         })
       });
 
-      const data = await response.json();
-      const aiResponse = JSON.parse(data.choices[0].message.content);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Function error: ${response.status}`);
+      }
 
-      // Filter actual timeline entries that match
-      const matchingEntries = timelineItems.filter(item =>
-        aiResponse.relevantEntries.includes(item.id)
+      const result = await response.json();
+      return result;
+
+    } catch (error) {
+      console.error('AI Search Error:', error);
+      
+      // Fallback: Basic text search (timelineItems is now accessible here)
+      console.log('🔄 Using fallback text search');
+      const basicMatches = timelineItems.filter(item => 
+        item.title?.toLowerCase().includes(query.toLowerCase()) ||
+        item.description?.toLowerCase().includes(query.toLowerCase()) ||
+        item.content?.toLowerCase().includes(query.toLowerCase())
       );
 
       return {
         query: query,
-        summary: aiResponse.summary,
-        entries: matchingEntries,
-        skills: aiResponse.keySkills,
-        confidence: aiResponse.confidence
+        summary: `Found ${basicMatches.length} entries with basic text matching for "${query}". AI search temporarily unavailable.`,
+        entries: basicMatches.slice(0, 5),
+        skills: [],
+        confidence: 0.5
       };
-
-    } catch (error) {
-      console.error('AI Search Error:', error);
-      throw new Error('Search temporarily unavailable');
     }
   }
 }
