@@ -147,79 +147,14 @@ class ApiService {
     };
   }
 
-  // AI search method that uses OpenAI locally and Netlify functions in production
+  // AI search via Netlify Function (server-side) — works in both local (netlify dev) and production
   async searchTimelineWithAI(query) {
     let timelineItems = []; // Declare outside try block so it's accessible in catch
-    
+
     try {
       // Get all timeline items first
       timelineItems = await this.getTimeline();
 
-      // Check if we're in local development
-      const isLocalDev = process.env.NODE_ENV === 'development';
-      const hasLocalApiKey = process.env.REACT_APP_OPENAI_API_KEY;
-      
-      if (isLocalDev && hasLocalApiKey) {
-        console.log('🚧 Local development mode: Making direct OpenAI call');
-        
-        // Direct OpenAI call for local development
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [
-              {
-                role: "system",
-                content: `You are searching through a developer's career gap timeline. Analyze the user's query and find relevant timeline entries.
-
-Timeline Data:
-${JSON.stringify(timelineItems, null, 2)}
-
-Return a JSON response with:
-{
-  "summary": "Brief explanation of what you found",
-  "relevantEntries": [array of timeline entry IDs that match],
-  "keySkills": [array of skills/technologies mentioned],
-  "confidence": 0.85
-}`
-              },
-              {
-                role: "user",
-                content: query
-              }
-            ],
-            max_tokens: 500,
-            temperature: 0.3
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error(`OpenAI API error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const aiResponse = JSON.parse(data.choices[0].message.content);
-
-        // Filter actual timeline entries that match
-        const matchingEntries = timelineItems.filter(item =>
-          aiResponse.relevantEntries.includes(item.id)
-        );
-
-        return {
-          query: query,
-          summary: aiResponse.summary,
-          entries: matchingEntries,
-          skills: aiResponse.keySkills,
-          confidence: aiResponse.confidence
-        };
-      }
-
-      // Production: Call Netlify function
-      console.log('🚀 Production mode: Using Netlify function');
       const response = await fetch('/.netlify/functions/ai-search', {
         method: 'POST',
         headers: {
