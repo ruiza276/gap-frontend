@@ -120,7 +120,7 @@ const AITimelineSearch = ({ onResultsFound, onDateSelect }) => {
                     textAlign: 'center',
                     fontWeight: '500'
                 }}>
-                    Search my timeline using natural language - powered by OpenAI
+                    Search my timeline using natural language - powered by Google Gemini
                 </p>
             </div>
 
@@ -217,14 +217,12 @@ const AITimelineSearch = ({ onResultsFound, onDateSelect }) => {
                 <div className="alert alert-error">
                     <div className="alert-icon">⚠</div>
                     <div>
-                        <strong>Search Error</strong>
-                        <p>{error}</p>
-                        {process.env.NODE_ENV === 'development' && (
-                            <details style={{ marginTop: '10px', fontSize: '0.75rem' }}>
-                                <summary>Debug Info</summary>
-                                <div>Check console for detailed error information</div>
-                            </details>
-                        )}
+                        <strong>AI Search Unavailable</strong>
+                        <p style={{ margin: '4px 0 0 0' }}>{error}</p>
+                        <p style={{ margin: '8px 0 0 0', fontSize: '0.8rem', opacity: 0.8 }}>
+                            This feature runs on Google's free AI tier, which has occasional availability limits.
+                            The calendar and timeline below still work normally.
+                        </p>
                     </div>
                 </div>
             )}

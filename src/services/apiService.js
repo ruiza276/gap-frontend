@@ -5,7 +5,7 @@ class ApiService {
     this.baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5156';
     this.requestCount = 0;
 
-    // Removed the OpenAI API key check since we're using Netlify Functions now
+    // AI search routes through a Netlify Function — no API key needed in the browser
   }
 
   // Optimized fetch with caching and debouncing
@@ -168,7 +168,7 @@ class ApiService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Function error: ${response.status}`);
+        throw new Error(errorData.message || errorData.error || `Function error: ${response.status}`);
       }
 
       const result = await response.json();

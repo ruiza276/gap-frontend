@@ -7,7 +7,7 @@ A full-stack portfolio/resume web app that lets you document and showcase your c
 ## What It Does
 
 - **Timeline** — create, edit, and display career entries with optional file/image attachments
-- **AI Search** — visitors can search the timeline using natural language (powered by OpenAI, routed server-side)
+- **AI Search** — visitors can search the timeline using natural language (powered by Google Gemini, routed server-side)
 - **Contact Form** — visitors can leave messages; you can view, mark as read, and delete them
 - **File Storage** — images and documents are stored in Azure Blob Storage
 - **Database** — all data lives in Azure Cosmos DB (NoSQL)
@@ -25,7 +25,7 @@ A full-stack portfolio/resume web app that lets you document and showcase your c
 | Backend hosting | Azure App Service |
 | Database | Azure Cosmos DB |
 | File storage | Azure Blob Storage |
-| AI | OpenAI API (gpt-4o-mini) |
+| AI | Google Gemini API (gemini-flash-latest) |
 | Tests | xUnit, Moq, FluentAssertions |
 
 ---
@@ -46,7 +46,7 @@ gapinmyresume-dev/
 │   │   └── App.jsx                 # Root component + routing
 │   └── netlify/
 │       └── functions/
-│           └── ai-search.js        # Serverless function — calls OpenAI server-side
+│           └── ai-search.js        # Serverless function — calls Google Gemini server-side
 │
 └── GapInMyResume.API/              # ASP.NET Core backend (separate repo)
     ├── Controllers/
@@ -77,7 +77,7 @@ Before you start, make sure you have these installed:
 - An **Azure account** with:
   - An Azure Cosmos DB account and database
   - An Azure Blob Storage account with two containers (`images` and `textfiles`)
-- An **OpenAI API key** — sign up at [platform.openai.com](https://platform.openai.com/)
+- A **Google Gemini API key** — get one free at [aistudio.google.com](https://aistudio.google.com) (no credit card required)
 
 ---
 
@@ -117,10 +117,10 @@ In the `gap-frontend/` folder, create a file called `.env.local`:
 
 ```
 REACT_APP_API_BASE_URL=http://localhost:5156
-OPENAI_API_KEY=sk-proj-your-openai-key-here
+GEMINI_API_KEY=your-gemini-api-key-here
 ```
 
-> **Note:** `OPENAI_API_KEY` does NOT have the `REACT_APP_` prefix on purpose — that prefix would cause React to embed the key in the browser bundle where anyone could steal it. Instead, the key is only read by the Netlify Function running on the server.
+> **Note:** `GEMINI_API_KEY` does NOT have the `REACT_APP_` prefix on purpose — that prefix would cause React to embed the key in the browser bundle where anyone could steal it. Instead, the key is only read by the Netlify Function running on the server.
 
 ### 4. Install frontend dependencies
 
@@ -219,7 +219,7 @@ The backend is deployed to Azure App Service. The connection strings are set as 
 ### Frontend → Netlify
 
 1. Connect your `gap-frontend` GitHub repo to Netlify
-2. Set the environment variable in Netlify: Site Settings → Environment Variables → add `OPENAI_API_KEY`
+2. Set the environment variable in Netlify: Site Settings → Environment Variables → add `GEMINI_API_KEY`
 3. Netlify auto-deploys on every push to `main`
 
 ---
@@ -232,4 +232,4 @@ Never put real keys in files that get committed to git.
 |---|---|---|
 | Azure Blob connection string | `dotnet user-secrets` | Azure App Service → Application Settings |
 | Azure Cosmos DB connection string | `dotnet user-secrets` | Azure App Service → Application Settings |
-| OpenAI API key | `.env.local` (gitignored) | Netlify → Environment Variables |
+| Gemini API key | `.env.local` (gitignored) | Netlify → Environment Variables |

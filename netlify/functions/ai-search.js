@@ -93,10 +93,20 @@ Return ONLY a valid JSON object with no markdown, no code blocks, just raw JSON:
     if (!response.ok) {
       const errorText = await response.text();
       console.error('❌ Gemini API error:', errorText);
+
+      const userMessages = {
+        503: { error: 'gemini_unavailable', message: "Google's free AI tier is temporarily overloaded. This happens occasionally — please try again in 30–60 seconds." },
+        429: { error: 'gemini_rate_limit', message: "Too many requests to Google's free AI tier. Please wait a minute before trying again." },
+        400: { error: 'gemini_bad_request', message: 'The search request was invalid. Try rephrasing your query.' },
+        401: { error: 'gemini_auth', message: 'AI search is misconfigured. Please contact the site owner.' },
+      };
+
+      const userError = userMessages[response.status] || { error: 'gemini_error', message: `AI search is temporarily unavailable (error ${response.status}). Please try again shortly.` };
+
       return {
         statusCode: response.status,
         headers,
-        body: JSON.stringify({ error: `Gemini API error: ${response.status}` })
+        body: JSON.stringify(userError)
       };
     }
 
