@@ -1,7 +1,7 @@
 // netlify/functions/ai-search.js
 exports.handler = async (event, context) => {
   console.log('🔍 Function called with method:', event.httpMethod);
-  
+
   // CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -43,68 +43,65 @@ exports.handler = async (event, context) => {
 
     console.log('🔍 Query:', query);
     console.log('🔍 Timeline items count:', timelineItems.length);
-    console.log('🔍 API key present:', !!process.env.OPENAI_API_KEY);
+    console.log('🔍 API key present:', !!process.env.GEMINI_API_KEY);
 
-    if (!process.env.OPENAI_API_KEY) {
-      console.error('❌ OpenAI API key not found in environment');
+    if (!process.env.GEMINI_API_KEY) {
+      console.error('❌ Gemini API key not found in environment');
       return {
         statusCode: 500,
         headers,
-        body: JSON.stringify({ error: 'OpenAI API key not configured' })
+        body: JSON.stringify({ error: 'Gemini API key not configured' })
       };
     }
 
-    console.log('🔍 Making OpenAI request...');
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: `You are searching through a developer's career gap timeline. Analyze the user's query and find relevant timeline entries.
+    const prompt = `You are searching through a developer's career gap timeline. Analyze the user's query and find relevant timeline entries.
 
 Timeline Data:
 ${JSON.stringify(timelineItems, null, 2)}
 
-Return a JSON response with:
+User query: ${query}
+
+Return ONLY a valid JSON object with no markdown, no code blocks, just raw JSON:
 {
   "summary": "Brief explanation of what you found",
-  "relevantEntries": [array of timeline entry IDs that match],
-  "keySkills": [array of skills/technologies mentioned],
+  "relevantEntries": ["array of timeline entry IDs that match"],
+  "keySkills": ["array of skills/technologies mentioned"],
   "confidence": 0.85
-}`
-          },
-          {
-            role: "user",
-            content: query
-          }
-        ],
-        max_tokens: 500,
-        temperature: 0.3
-      })
-    });
+}`;
 
-    console.log('🔍 OpenAI response status:', response.status);
+    console.log('🔍 Making Gemini request...');
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 500,
+          }
+        })
+      }
+    );
+
+    console.log('🔍 Gemini response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('❌ OpenAI API error:', errorText);
+      console.error('❌ Gemini API error:', errorText);
       return {
         statusCode: response.status,
         headers,
-        body: JSON.stringify({ error: `OpenAI API error: ${response.status}` })
+        body: JSON.stringify({ error: `Gemini API error: ${response.status}` })
       };
     }
 
     const data = await response.json();
-    console.log('🔍 OpenAI response received');
-    
-    const aiResponse = JSON.parse(data.choices[0].message.content);
+    console.log('🔍 Gemini response received');
+
+    const rawText = data.candidates[0].content.parts[0].text;
+    const aiResponse = JSON.parse(rawText);
 
     // Filter actual timeline entries that match
     const matchingEntries = timelineItems.filter(item =>
@@ -127,13 +124,13 @@ Return a JSON response with:
   } catch (error) {
     console.error('❌ Function error:', error);
     console.error('❌ Error stack:', error.stack);
-    
+
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         error: 'Search temporarily unavailable',
-        details: error.message 
+        details: error.message
       })
     };
   }
