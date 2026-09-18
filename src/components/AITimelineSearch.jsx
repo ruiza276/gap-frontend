@@ -120,7 +120,7 @@ const AITimelineSearch = ({ onResultsFound, onDateSelect }) => {
                     textAlign: 'center',
                     fontWeight: '500'
                 }}>
-                    Search my timeline using natural language - powered by Google Gemini
+                    Search my timeline using natural language - powered by Claude
                 </p>
             </div>
 

@@ -10,113 +10,114 @@ exports.handler = async (event, context) => {
     'Content-Type': 'application/json',
   };
 
-  // Handle preflight OPTIONS request
   if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers,
-      body: ''
-    };
+    return { statusCode: 200, headers, body: '' };
   }
 
-  // Only allow POST requests
   if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      headers,
-      body: JSON.stringify({ error: 'Method not allowed' })
-    };
+    return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
 
   try {
-    console.log('🔍 Parsing request body...');
     const { query, timelineItems } = JSON.parse(event.body);
 
     if (!query || !timelineItems) {
-      console.error('❌ Missing query or timeline data');
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({ error: 'Missing query or timeline data' })
-      };
+      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Missing query or timeline data' }) };
     }
 
     console.log('🔍 Query:', query);
     console.log('🔍 Timeline items count:', timelineItems.length);
-    console.log('🔍 API key present:', !!process.env.GEMINI_API_KEY);
+    console.log('🔍 API key present:', !!process.env.ANTHROPIC_API_KEY);
 
-    if (!process.env.GEMINI_API_KEY) {
-      console.error('❌ Gemini API key not found in environment');
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({ error: 'Gemini API key not configured' })
-      };
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return { statusCode: 500, headers, body: JSON.stringify({ error: 'API key not configured' }) };
     }
 
-    const prompt = `You are searching through a developer's career gap timeline. Analyze the user's query and find relevant timeline entries.
+    // Trim to only what Claude needs — keeps the request fast and within limits
+    const trimmedItems = timelineItems.map(({ id, title, date, description }) => ({
+      id,
+      title,
+      date,
+      description: description ? description.substring(0, 200) : ''
+    }));
 
-Timeline Data:
-${JSON.stringify(timelineItems, null, 2)}
-
-User query: ${query}
-
-Return ONLY a valid JSON object with no markdown, no code blocks, just raw JSON:
-{
-  "summary": "Brief explanation of what you found",
-  "relevantEntries": ["array of timeline entry IDs that match"],
-  "keySkills": ["array of skills/technologies mentioned"],
-  "confidence": 0.85
-}`;
-
-    console.log('🔍 Making Gemini request...');
-    const response = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-goog-api-key': process.env.GEMINI_API_KEY,
-        },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 500,
+    console.log('🔍 Making Claude request...');
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        system: 'You are searching through a developer\'s career gap timeline. Analyze the query and find relevant entries using the search_results tool.',
+        tools: [
+          {
+            name: 'search_results',
+            description: 'Return the results of searching the timeline',
+            input_schema: {
+              type: 'object',
+              properties: {
+                summary: {
+                  type: 'string',
+                  description: 'Brief explanation of what was found'
+                },
+                relevantEntries: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Array of timeline entry IDs that match the query'
+                },
+                keySkills: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'Skills or topics mentioned in the matching entries'
+                },
+                confidence: {
+                  type: 'number',
+                  description: 'Confidence score between 0 and 1'
+                }
+              },
+              required: ['summary', 'relevantEntries', 'keySkills', 'confidence']
+            }
           }
-        })
-      }
-    );
+        ],
+        tool_choice: { type: 'tool', name: 'search_results' },
+        messages: [
+          {
+            role: 'user',
+            content: `Timeline Data:
+${JSON.stringify(trimmedItems, null, 2)}
 
-    console.log('🔍 Gemini response status:', response.status);
+Search query: ${query}`
+          }
+        ]
+      })
+    });
+
+    console.log('🔍 Claude response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('❌ Gemini API error:', errorText);
+      console.error('❌ Claude API error:', errorText);
 
       const userMessages = {
-        503: { error: 'gemini_unavailable', message: "Google's free AI tier is temporarily overloaded. This happens occasionally — please try again in 30–60 seconds." },
-        429: { error: 'gemini_rate_limit', message: "Too many requests to Google's free AI tier. Please wait a minute before trying again." },
-        400: { error: 'gemini_bad_request', message: 'The search request was invalid. Try rephrasing your query.' },
-        401: { error: 'gemini_auth', message: 'AI search is misconfigured. Please contact the site owner.' },
+        529: { error: 'claude_overloaded', message: 'AI search is temporarily overloaded. Please try again in 30 seconds.' },
+        429: { error: 'claude_rate_limit', message: 'Too many requests. Please wait a moment and try again.' },
+        401: { error: 'claude_auth', message: 'AI search is misconfigured. Please contact the site owner.' },
       };
 
-      const userError = userMessages[response.status] || { error: 'gemini_error', message: `AI search is temporarily unavailable (error ${response.status}). Please try again shortly.` };
+      const userError = userMessages[response.status] || { error: 'claude_error', message: `AI search is temporarily unavailable (error ${response.status}). Please try again shortly.` };
 
-      return {
-        statusCode: response.status,
-        headers,
-        body: JSON.stringify(userError)
-      };
+      return { statusCode: response.status, headers, body: JSON.stringify(userError) };
     }
 
     const data = await response.json();
-    console.log('🔍 Gemini response received');
+    console.log('🔍 Claude response received');
 
-    const rawText = data.candidates[0].content.parts[0].text;
-    const aiResponse = JSON.parse(rawText);
+    const aiResponse = data.content[0].input;
 
-    // Filter actual timeline entries that match
     const matchingEntries = timelineItems.filter(item =>
       aiResponse.relevantEntries && aiResponse.relevantEntries.includes(item.id)
     );
@@ -126,7 +127,7 @@ Return ONLY a valid JSON object with no markdown, no code blocks, just raw JSON:
       statusCode: 200,
       headers,
       body: JSON.stringify({
-        query: query,
+        query,
         summary: aiResponse.summary,
         entries: matchingEntries,
         skills: aiResponse.keySkills || [],

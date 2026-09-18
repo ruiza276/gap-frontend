@@ -129,27 +129,27 @@ cd gap-frontend
 npm install
 ```
 
-### 5. Run the backend
+### 5. Run the app locally (two terminals required)
 
+The app has two separate processes that must both be running at the same time.
+
+**Terminal 1 — .NET backend** (handles timeline, messages, and file storage):
 ```bash
 cd GapInMyResume.API
 dotnet run
 ```
+The API will be available at `http://localhost:5156`. Full API docs at `http://localhost:5156/swagger`.
 
-The API will be available at `http://localhost:5156`. You can browse the full API docs at `http://localhost:5156/swagger`.
-
-### 6. Run the frontend
-
-Use `netlify dev` instead of `npm start` — this runs both the React app and the serverless AI function together:
-
+**Terminal 2 — React frontend + Netlify Functions** (handles the UI and AI search):
 ```bash
 cd gap-frontend
-netlify dev
+npx netlify dev
 ```
-
 The app will open at `http://localhost:8888`.
 
-> **Why not `npm start`?** Running `npm start` alone starts React but not the Netlify Functions. The AI search feature calls `/.netlify/functions/ai-search`, which only exists when you run `netlify dev`.
+> **Why two terminals?** `npx netlify dev` starts React and the AI search function, but it does NOT start the .NET backend. The backend is a separate process — without it running, the timeline and messages won't load.
+>
+> **Why `npx netlify dev` and not `npm start`?** `npm start` only runs React. `npx netlify dev` also runs the Netlify Functions (the serverless AI search). Use `npx` because the CLI is installed locally in the project, not globally.
 
 ---
 
