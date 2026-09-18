@@ -1490,6 +1490,12 @@ body {
   box-shadow: var(--tech-shadow-md);
 }
 
+.calendar-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
+}
+
 .calendar-month-year {
   font-size: 1.25rem;
   font-weight: 700;

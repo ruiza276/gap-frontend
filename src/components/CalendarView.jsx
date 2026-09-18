@@ -44,6 +44,9 @@ const CalendarView = ({ onDateSelect, selectedDate, timelineItems = [] }) => {
     onDateSelect(dateKey);
   };
 
+  const today = new Date();
+  const isCurrentMonth = currentYear === today.getFullYear() && currentMonth === today.getMonth();
+
   const navigateMonth = (direction) => {
     if (direction === 'prev') {
       if (currentMonth === 0) {
@@ -53,6 +56,7 @@ const CalendarView = ({ onDateSelect, selectedDate, timelineItems = [] }) => {
         setCurrentMonth(currentMonth - 1);
       }
     } else {
+      if (isCurrentMonth) return;
       if (currentMonth === 11) {
         setCurrentMonth(0);
         setCurrentYear(currentYear + 1);
@@ -107,9 +111,10 @@ const CalendarView = ({ onDateSelect, selectedDate, timelineItems = [] }) => {
         <h3 className="calendar-month-year">
           {monthNames[currentMonth]} {currentYear}
         </h3>
-        <button 
+        <button
           className="calendar-nav-btn"
           onClick={() => navigateMonth('next')}
+          disabled={isCurrentMonth}
         >
           ›
         </button>
